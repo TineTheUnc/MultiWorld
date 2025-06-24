@@ -1,0 +1,52 @@
+this mod use for create infinite world.
+use WorldMirror at left and right side of world.
+it will create new world and teleport player to new world.
+you can generate worlds until your drive full.
+
+You can play normal world and can setting in mod config for switch world create between normal world and multi world.
+
+!!! This mod is beta version it can have some problem.
+!!! Don't use in multiplayer.
+
+V0.2
+- Can play normal world at enable this mod.
+- Spawn at left or right side of world after use World Mirror.
+- Fix world UI for multi world.
+- Fix generate world system for randomized.
+
+V0.3
+- Fix world name bug.
+- Fix respawn system you will.
+if you die in multi world you will respawn at spawn point in world index 0.
+
+V0.4
+- Bug fix.
+- Respawn system.
+If you set respawn point in some world in multi wolrd you will respawn at spawn point in that world.
+- Fix MetaData file format.
+Please create new multi world for new MetaData file (Old version file not work).
+
+V0.5
+- Secret seeds support.
+- Fix player spawn point (Y axis).
+Use player position Y for find spawn point after teleport. 
+
+V0.6
+- Fix world create UI for multi world.
+- Add world radius Systems.
+You world is round. If go to end of world you will teleport to other side world (if radius is 1. you can't teleport to 2 but teleport to -1 after 1).
+
+V0.7
+- Fix Magic Mirror and Phone for work in multi world
+- Fix player spawn point calculate before use.
+
+V0.8
+- Sync world system
+Sync data between world and update world progress.
+I tried to sync every data but i don't know it is all.
+Tell me if you found problem or bug.
+Recommend create new world for good experience.
+
+Not found any bug in testing but i can't test in every case. (be careful)
+
+You can support me with your money if you need : https://ko-fi.com/tine2548

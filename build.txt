@@ -1,0 +1,4 @@
+displayName = MultiMap World(Beta)
+author = Tine
+version = 0.8.2
+side = both

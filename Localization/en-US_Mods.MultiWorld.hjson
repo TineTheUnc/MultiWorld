@@ -1,0 +1,15 @@
+Items: {
+	WorldMirror: {
+		DisplayName: World Mirror
+		Tooltip: Use at left or right side of map
+	}
+}
+
+UI: {
+	Description: {
+		MultiWorldToggle: Toggle Create Multi World system.
+		MultiWorldRadius: Set MultiWorld radius. LeftClick: +1. RightClick: -1. 0 is disable.
+	}
+
+	RadiusNumberBox: "World Radius: "
+}
