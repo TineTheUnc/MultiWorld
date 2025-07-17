@@ -15,7 +15,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 {
 	public class Desert
 	{
-		public List<string> removeList = [
+		public static List<string> removeList = [
 			"Ocean Sand",
 			"Generate Ice Biome",
 			"Jungle",
@@ -52,35 +52,36 @@ namespace MultiWorld.Common.Systems.WorldGens
 			"Full Desert"
 		];
 
-		public List<GenPass> Gens(List<GenPass> tasks)
+		public static List<GenPass> Gens(List<GenPass> tasks, ref double totalWeight)
 		{
-			var system = ModContent.GetInstance<WorldManageSystem>();
-			system.Shimmer = false;
-			system.Evil = 0;
+			OneBiome.Shimmer = false;
+			OneBiome.Evil = 0;
+			OneBiome.Biome = "Desert";
 			foreach (string item in removeList)
 			{
 				int index = tasks.FindIndex(genpass => genpass.Name.Equals(item));
 				if (index != -1)
 				{
+					double loadWeight = tasks[index].Weight;
 					tasks.Remove(tasks[index]);
 					if (item == "Buried Chests")
 					{
-						tasks.Insert(index, new CommonGen.BuriedChestPass(false));
+						tasks.Insert(index, new OneBiome.BuriedChestPass(true, loadWeight));
 					}
 					else if (item == "Dunes")
 					{
-						tasks.Insert(index, new DunesPass());
+						tasks.Insert(index, new DunesPass(loadWeight));
 					} else if ( item == "Full Desert" )
 					{
-						tasks.Insert(index, new DesertPass());
-						tasks.Insert(index, new MoreSand());
+						tasks.Insert(index, new DesertPass(loadWeight/2));
+						tasks.Insert(index, new MoreSand(loadWeight/2));
 					}
 				}
 			}
 			return tasks;
 		}
 
-		public class DesertPass() : GenPass("Full Desert", 100f)
+		public class DesertPass(double loadWeight) : GenPass("Full Desert", loadWeight)
 		{
 			protected override void ApplyPass(GenerationProgress progress, GameConfiguration passConfig)
 			{
@@ -143,7 +144,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 			}
 		}
 
-		public class DunesPass() : GenPass("Dunes", 100f)
+		public class DunesPass(double loadWeight) : GenPass("Dunes", loadWeight)
 		{
 			protected override void ApplyPass(GenerationProgress progress, GameConfiguration passConfig)
 			{
@@ -181,7 +182,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 			}
 		}
 
-		public class MoreSand() : GenPass("More Sand", 100f)
+		public class MoreSand(double loadWeight) : GenPass("More Sand", loadWeight)
 		{
 			protected override void ApplyPass(GenerationProgress progress, GameConfiguration passConfig)
 			{

@@ -47,6 +47,15 @@ I tried to sync every data but i don't know it is all.
 Tell me if you found problem or bug.
 Recommend create new world for good experience.
 
+V0.9
+- Bug fix.
+- New meta file format.
+- New world generate type (Beta).
+Can turn on in mod config.
+In this world generate type one map will hame only one biome and structures will random spawn.
+
 Not found any bug in testing but i can't test in every case. (be careful)
 
 You can support me with your money if you need : https://ko-fi.com/tine2548
+
+Source Code : https://github.com/TineTheUnc/MultiWorld

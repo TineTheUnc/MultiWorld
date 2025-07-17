@@ -5,7 +5,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using MultiWorld.Common.Systems;
-using MultiWorld.Common.Type;
+using MultiWorld.Common.Types;
 
 namespace MultiWorld.Common.Item
 {

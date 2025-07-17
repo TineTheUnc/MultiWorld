@@ -1,10 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using MultiWorld.Common.Type;
+using MultiWorld.Common.Types;
 using ReLogic.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -18,9 +19,60 @@ using Terraria.WorldBuilding;
 
 namespace MultiWorld.Common.Systems.WorldGens
 {
-	public class CommonGen
+	public class OneBiome
 	{
-		public class BuriedChestPass(bool Desert) : GenPass("Buried Chests", 100f)
+
+		public static bool Shimmer = true;
+		public static short Evil = 0; 
+		public static string Biome = string.Empty;
+		public static bool HaveDungeon = false;
+		public static bool HaveTemple = false;
+		public static bool HaveShimmer = false;
+		public static List<string> Biomes = new()
+		{
+			"Forest",
+			"Desert",
+			"Jungle",
+			"Corruption",
+			"Snow",
+			"Ocean"
+		};
+		public static void Reset()
+		{
+			Shimmer = true;
+			Evil = 0;
+		}
+
+		public static List<GenPass> GenWorld(List<GenPass> tasks, ref double totalWeight) {
+			var index = Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path);
+			if (index == "0")
+			{
+				Forest.Gens(tasks, true,ref totalWeight);
+			}
+			else
+			{
+				int i = tasks.FindIndex(genpass => genpass.Name.Equals("Spawn Point"));
+				tasks.Remove(tasks[i]);
+				int j = tasks.FindIndex(genpass => genpass.Name.Equals("Guide"));
+				tasks.Remove(tasks[j]);
+				Biome = string.Empty;
+				Random random = new();
+				string randomBar = Biomes.OrderBy(s => random.NextDouble()).First();
+				tasks = randomBar switch
+				{
+					"Forest" => Forest.Gens(tasks, false, ref totalWeight),
+					"Desert" => Desert.Gens(tasks, ref totalWeight),
+					"Jungle" => Jungle.Gens(tasks, ref totalWeight),
+					"Corruption" => Corruption.Gens(tasks, ref totalWeight),
+					"Snow" => Snow.Gens(tasks, ref totalWeight),
+					"Ocean"=> Ocean.Gens(tasks, ref totalWeight),
+					_ => Forest.Gens(tasks, false, ref totalWeight),
+				};
+			}
+			return tasks;
+		}
+
+		public class BuriedChestPass(bool Desert, double loadWeight) : GenPass("Buried Chests", loadWeight)
 		{
 			protected override void ApplyPass(GenerationProgress progress, GameConfiguration passConfig)
 			{
@@ -131,16 +183,15 @@ namespace MultiWorld.Common.Systems.WorldGens
 				ilCursor.Remove();
 				ilCursor.EmitDelegate<Func<int>>(() =>
 				{
-					if (!MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+					if (OneBiome.Biome == string.Empty)
 					{
 						return 2;
 					}
-					var system = ModContent.GetInstance<WorldManageSystem>();
-					if (system.Evil == 1)
+					if (OneBiome.Evil == 1)
 					{
 						return 23;
 					}
-					else if (system.Evil == 2)
+					else if (OneBiome.Evil == 2)
 					{
 						return 199;
 					}
@@ -153,16 +204,15 @@ namespace MultiWorld.Common.Systems.WorldGens
 				ilCursor.Remove();
 				ilCursor.EmitDelegate<Func<int>>(() =>
 				{
-					if (!MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+					if (OneBiome.Biome == string.Empty)
 					{
 						return 2;
 					}
-					var system = ModContent.GetInstance<WorldManageSystem>();
-					if (system.Evil == 1)
+					if (OneBiome.Evil == 1)
 					{
 						return 23;
 					}
-					else if (system.Evil == 2)
+					else if (OneBiome.Evil == 2)
 					{
 						return 199;
 					}
@@ -189,8 +239,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				ilCursor.EmitDelegate<Action>(() =>
 				{
 					var ShimmerCleanUpInfo = typeof(WorldGen).GetMethod("ShimmerCleanUp", BindingFlags.Static | BindingFlags.NonPublic);
-					var system = ModContent.GetInstance<WorldManageSystem>();
-					if (system.Shimmer || !MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+					if (OneBiome.Shimmer  || OneBiome.Biome == string.Empty)
 					{
 						ShimmerCleanUpInfo.Invoke(null, null);
 					}
@@ -216,8 +265,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				ilCursor.EmitLdloc(4);
 				ilCursor.EmitDelegate<Func<Point, Point>>((point2) =>
 				{
-					var system = ModContent.GetInstance<WorldManageSystem>();
-					if (system.Shimmer || !MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+					if (OneBiome.Shimmer ||  OneBiome.Biome == string.Empty)
 					{
 						while (Vector2D.Distance(new Vector2D(point2.X, point2.Y), GenVars.shimmerPosition) < (double)WorldGen.shimmerSafetyDistance)
 						{
@@ -245,18 +293,16 @@ namespace MultiWorld.Common.Systems.WorldGens
 				ilCursor.Index++;
 				ilCursor.EmitDelegate<Func<ushort, ushort>>((wallType) =>
 				{
-					if (!MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+					if (OneBiome.Biome == string.Empty)
 					{
 						return wallType;
 					}
-					var system = ModContent.GetInstance<WorldManageSystem>();
-					if (system.Evil == 1)
+					if (OneBiome.Evil == 1)
 					{
 						return 69;
 					}
-					else if (system.Evil == 2)
+					else if (OneBiome.Evil == 2)
 					{
-						Console.WriteLine("Ok");
 						return 81;
 					}
 					else
@@ -266,7 +312,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				});
 				ilCursor.GotoNext(i => i.MatchLdcI4(5));
 				ilCursor.EmitDelegate<Func<bool>>(() => {
-					return MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path);
+					return OneBiome.Biome != string.Empty;
 				});
 				ilCursor.EmitBrfalse(label);
 

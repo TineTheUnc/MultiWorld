@@ -19,7 +19,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 {
 	public class Forest
 	{
-		public List<string> removeList = [
+		public static List<string> removeList = [
 			"Dunes",
 			"Ocean Sand",
 			"Generate Ice Biome",
@@ -27,7 +27,6 @@ namespace MultiWorld.Common.Systems.WorldGens
 			"Mud Caves To Grass",
 			"Full Desert",
 			"Corruption",
-			"Dungeon",
 			"Beaches",
 			"Create Ocean Caves",
 			"Pyramids",
@@ -48,22 +47,55 @@ namespace MultiWorld.Common.Systems.WorldGens
 			"Larva",
 			"Lihzahrd Altars",
 			"Buried Chests",
-			"Shimmer"
 		];
 
-		public List<GenPass> Gens(List<GenPass> tasks) {
-			var system = ModContent.GetInstance<WorldManageSystem>();
-			system.Shimmer = false;
-			system.Evil = 0;
+		public static List<GenPass> Gens(List<GenPass> tasks, bool first, ref double totalWeight) {
+			OneBiome.Shimmer = false;
+			OneBiome.Evil = 0;
+			OneBiome.Biome = "Forest";
 			foreach (string item in removeList)
 			{
 				int index = tasks.FindIndex(genpass => genpass.Name.Equals(item));
 				if (index != -1)
 				{
+					double loadWeight = tasks[index].Weight;
 					tasks.Remove(tasks[index]);
 					if (item == "Buried Chests")
 					{
-						tasks.Insert(index, new CommonGen.BuriedChestPass(false));
+						tasks.Insert(index, new OneBiome.BuriedChestPass(false, loadWeight));
+					}
+				}
+			}
+			if (first)
+			{
+				int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
+				tasks.Remove(tasks[dungeon]);
+				int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
+				tasks.Remove(tasks[shimmer]);
+			}
+			else {
+				int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
+				if (OneBiome.HaveDungeon)
+				{
+					tasks.Remove(tasks[dungeon]);
+				}
+				else
+				{
+					if (WorldGen.genRand.NextBool(9, 10))
+					{
+						tasks.Remove(tasks[dungeon]);
+					}
+				}
+				int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
+				if (OneBiome.HaveShimmer)
+				{
+					tasks.Remove(tasks[shimmer]);
+				}
+				else
+				{
+					if (WorldGen.genRand.NextBool(9, 10))
+					{
+						tasks.Remove(tasks[shimmer]);
 					}
 				}
 			}

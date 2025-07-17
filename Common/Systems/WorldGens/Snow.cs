@@ -14,7 +14,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 {
 	public class Snow
 	{
-		List<string> removeList = [
+		public static List<string> removeList = [
 				"Dunes",
 				"Ocean Sand",
 				"Sand Patches",
@@ -50,38 +50,40 @@ namespace MultiWorld.Common.Systems.WorldGens
 				"Generate Ice Biome",
 				"Buried Chests"
 			];
-		public List<GenPass> Gens(List<GenPass> tasks)
+		public static List<GenPass> Gens(List<GenPass> tasks, ref double totalWeight)
 		{
-			var system = ModContent.GetInstance<WorldManageSystem>();
-			system.Shimmer = false;
-			system.Evil = 0;
+			OneBiome.Shimmer = false;
+			OneBiome.Evil = 0;
+			OneBiome.Biome = "Snow";
 			foreach (string item in removeList)
 			{
 				int index = tasks.FindIndex(genpass => genpass.Name.Equals(item));
 				if (index != -1)
 				{
+					double loadWeight = tasks[index].Weight;
+					totalWeight += loadWeight;
 					tasks.Remove(tasks[index]);
 					if (item == "Buried Chests")
 					{
-						tasks.Insert(index, new CommonGen.BuriedChestPass(false));
+						tasks.Insert(index, new OneBiome.BuriedChestPass(false, loadWeight));
 					} 
 					else if (item == "Generate Ice Biome")
 					{
-						tasks.Insert(index, new Snow.IcePass());
+						tasks.Insert(index, new IcePass(loadWeight));
 					}
 					else if (item == "Slush")
 					{
-						tasks.Insert(index, new Snow.SlushPass());
+						tasks.Insert(index, new SlushPass(loadWeight));
 					}
 					else if (item == "Gems In Ice Biome")
 					{
-						tasks.Insert(index, new Snow.GemsIcePass());
+						tasks.Insert(index, new GemsIcePass(loadWeight));
 					}
 				}
 			}
 			return tasks;
 		}
-		public class GemsIcePass() : GenPass("Gems In Ice Biome", 1000f)
+		public class GemsIcePass(double loadWeight) : GenPass("Gems In Ice Biome", loadWeight)
 		{
 			protected override void ApplyPass(GenerationProgress progress, GameConfiguration passConfig)
 			{
@@ -112,7 +114,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				}
 			}
 		}
-		public class SlushPass() : GenPass("Slush", 1000f) {
+		public class SlushPass(double loadWeight) : GenPass("Slush", loadWeight) {
 
 			protected override void ApplyPass(GenerationProgress progress, GameConfiguration passConfig) {
 				for (int num750 = GenVars.snowTop; num750 < GenVars.snowBottom; num750++)
@@ -159,7 +161,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 			}
 
 		}
-		public class IcePass() : GenPass("Generate Ice Biome", 1000f)
+		public class IcePass(double loadWeight) : GenPass("Generate Ice Biome", loadWeight)
 		{
 			protected override void ApplyPass(GenerationProgress progress, GameConfiguration passConfig)
 			{

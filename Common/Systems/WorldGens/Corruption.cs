@@ -15,7 +15,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 {
 	public class Corruption
 	{
-		public List<string> removeList = [
+		public static List<string> removeList = [
 				"Dunes",
 				"Ocean Sand",
 				"Generate Ice Biome",
@@ -50,30 +50,31 @@ namespace MultiWorld.Common.Systems.WorldGens
 				"Wood Tree Walls",
 		];
 
-		public List<GenPass> Gens(List<GenPass> tasks)
+		public static List<GenPass> Gens(List<GenPass> tasks, ref double totalWeight)
 		{
-			var system = ModContent.GetInstance<WorldManageSystem>();
-			system.Shimmer = false;
+			OneBiome.Biome = "Corruption";
+			OneBiome.Shimmer = false;
 			foreach (string item in removeList)
 			{
 				int index = tasks.FindIndex(genpass => genpass.Name.Equals(item));
 				if (index != -1)
 				{
+					double loadWeight = tasks[index].Weight;
 					tasks.Remove(tasks[index]);
 					if (item == "Buried Chests")
 					{
-						tasks.Insert(index, new CommonGen.BuriedChestPass(false));
+						tasks.Insert(index, new OneBiome.BuriedChestPass(false, loadWeight));
 					}
 					else if(item == "Corruption")
 					{
-						tasks.Insert(index, new CorruptionPass());
+						tasks.Insert(index, new CorruptionPass(loadWeight));
 					}
 				}
 			}
 			return tasks;
 		}
 
-		public class CorruptionPass() : GenPass("Corruption", 10f)
+		public class CorruptionPass(double loadWeight) : GenPass("Corruption", loadWeight)
 		{
 
 			protected override void ApplyPass(GenerationProgress progress, GameConfiguration passConfig)
@@ -91,7 +92,6 @@ namespace MultiWorld.Common.Systems.WorldGens
 				int num786 = 100;
 				bool flag49 = WorldGen.crimson;
 				double num787 = (double)Main.maxTilesX * 0.001;
-				var system = ModContent.GetInstance<WorldManageSystem>();
 				if (WorldGen.tenthAnniversaryWorldGen)
 				{
 					num785 *= 2;
@@ -103,7 +103,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				}
 				if (flag49)
 				{
-					system.Evil = 2;
+					OneBiome.Evil = 2;
 					progress.Message = Lang.gen[72].Value;
 					int num788 = 0;
 				
@@ -270,7 +270,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				}
 				if (!flag49)
 				{
-					system.Evil = 1;
+					OneBiome.Evil = 1;
 					progress.Message = Lang.gen[20].Value;
 					int num811 = 0;
 					while ((double)num811 < num787)

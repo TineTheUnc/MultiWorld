@@ -16,19 +16,25 @@ namespace MultiWorld.Common.UI
 			base.OnInitialize();
 			this.OnLeftClick += (evt, element) =>
 			{
-				Number++;
-				if (Number > Max)
-					Number = Max;
-				OnAdd(this);
-				SetText(Message + Number.ToString());
+				if (this.OnAdd != null)
+				{
+					Number++;
+					if (Number > Max)
+						Number = Max;
+					OnAdd(this);
+					SetText(Message + Number.ToString());
+				}
 			};
 			this.OnRightClick += (evt, element) =>
 			{
-				Number--;
-				if (Number < Min)
-					Number = Min;
-				OnReduce(this);
-				SetText(Message + Number.ToString());			
+				if (this.OnReduce != null)
+				{
+					Number--;
+					if (Number < Min)
+						Number = Min;
+					OnReduce(this);
+					SetText(Message + Number.ToString());
+				}
 			};
 		}
 	}

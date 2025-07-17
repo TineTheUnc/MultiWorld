@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
+using MultiWorld.Common.Config;
 using MultiWorld.Common.Systems.WorldGens;
-using MultiWorld.Common.Type;
+using MultiWorld.Common.Types;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,8 +19,10 @@ using Terraria.ID;
 using Terraria.IO;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 using Terraria.Social;
 using Terraria.WorldBuilding;
+using static Terraria.GameContent.Bestiary.IL_BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions;
 
 namespace MultiWorld.Common.Systems
 {
@@ -37,20 +40,13 @@ namespace MultiWorld.Common.Systems
 		public bool CreateMultiWorld = false;
 		public int Radius = 0;
 		public Dictionary<int, dynamic> WorldUpdateEvent = [];
-		public bool Shimmer = true;
-		public short Evil = 0; // 0 for None, 1 for Corruption, 2 for Crimson
-		public Forest Forest = new();
-		public Jungle Jungle = new();
-		public Snow Snow = new();
-		public Desert Desert = new();
-		public Corruption Corruption = new();
 
 		public override void Load()
 		{
-			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Final Cleanup"], CommonGen.ModifyFinalCleanup);
-			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Wall Variety"], CommonGen.ModifyWallVariety);
-			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Spreading Grass"], CommonGen.ModifySpreadingGrass);
-			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Grass Wall"], CommonGen.ModifyGrassWall);
+			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Final Cleanup"], OneBiome.ModifyFinalCleanup);
+			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Wall Variety"], OneBiome.ModifyWallVariety);
+			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Spreading Grass"], OneBiome.ModifySpreadingGrass);
+			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Grass Wall"], OneBiome.ModifyGrassWall);
 			base.Load();
 		}
 
@@ -58,6 +54,19 @@ namespace MultiWorld.Common.Systems
 		{
 			base.Unload();
 		}
+
+		public override void LoadWorldData(TagCompound tag)
+		{
+			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path)) if (tag.ContainsKey("Biome")) OneBiome.Biome = tag.GetString("Biome");
+			base.LoadWorldData(tag);
+		}
+
+		public override void SaveWorldData(TagCompound tag)
+		{
+			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path)) tag["Biome"] = OneBiome.Biome;
+			base.SaveWorldData(tag);
+		}  
+
 
 		public override void OnWorldUnload() 
 		{
@@ -216,6 +225,9 @@ namespace MultiWorld.Common.Systems
 				data.Bestiary_wasSeenNearPlayerByNetId = _wasSeenNearPlayerByNetId;
 				data.Bestiary_chattedWithPlayer = _chattedWithPlayer;
 				data.SaveFrom = Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path);
+				data.HaveDungeon = OneBiome.HaveDungeon;
+				data.HaveShimmer = OneBiome.HaveShimmer;
+				data.HaveTemple = OneBiome.HaveTemple;
 				MultiWorldFileData.SaveMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"), data);
 			}
 			base.OnWorldUnload();
@@ -294,25 +306,25 @@ namespace MultiWorld.Common.Systems
 					NPC.combatBookVolumeTwoWasUsed = data.NPC_combatBookVolumeTwoWasUsed;
 					NPC.peddlersSatchelWasUsed = data.NPC_peddlersSatchelWasUsed;
 					NPC.savedBartender = data.NPC_savedBartender;
-					NPC.ShimmeredTownNPCs = data.NPC_ShimmeredTownNPCs;
-					typeof(TownRoomManager).GetField("_hasRoom", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(WorldGen.TownManager, data.NPC_hasRoom);
-					NPC.killCount = data.NPC_killCount;
+					if (data.NPC_ShimmeredTownNPCs != null) NPC.ShimmeredTownNPCs = data.NPC_ShimmeredTownNPCs;
+					if (data.NPC_hasRoom != null) typeof(TownRoomManager).GetField("_hasRoom", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(WorldGen.TownManager, data.NPC_hasRoom);
+					if (data.NPC_killCount != null) NPC.killCount = data.NPC_killCount;
 					WorldGen.shadowOrbSmashed = data.WorldGen_shadowOrbSmashed;
 					WorldGen.spawnMeteor = data.WorldGen_spawnMeteor;
-					WorldGen.shadowOrbCount = data.WorldGen_shadowOrbCount;
-					WorldGen.treeBG1 = data.WorldGen_treeBG1;
-					WorldGen.treeBG2 = data.WorldGen_treeBG2;
-					WorldGen.treeBG3 = data.WorldGen_treeBG3;
-					WorldGen.treeBG4 = data.WorldGen_treeBG4;
-					WorldGen.corruptBG = data.WorldGen_corruptBG;
-					WorldGen.jungleBG = data.WorldGen_jungleBG;
-					WorldGen.snowBG = data.WorldGen_snowBG;
-					WorldGen.hallowBG = data.WorldGen_hallowBG;
-					WorldGen.crimsonBG = data.WorldGen_crimsonBG;
-					WorldGen.desertBG = data.WorldGen_desertBG;
-					WorldGen.oceanBG = data.WorldGen_oceanBG;
-					WorldGen.mushroomBG = data.WorldGen_mushroomBG;
-					WorldGen.underworldBG = data.WorldGen_underworldBG;
+					if (data.WorldGen_shadowOrbCount != null) WorldGen.shadowOrbCount = (int)data.WorldGen_shadowOrbCount;
+					if (data.WorldGen_treeBG1 != null) WorldGen.treeBG1 = (int)data.WorldGen_treeBG1;
+					if (data.WorldGen_treeBG2 != null) WorldGen.treeBG2 = (int)data.WorldGen_treeBG2;
+					if (data.WorldGen_treeBG3 != null) WorldGen.treeBG3 = (int)data.WorldGen_treeBG3;
+					if (data.WorldGen_treeBG4 != null) WorldGen.treeBG4 = (int)data.WorldGen_treeBG4;
+					if (data.WorldGen_corruptBG != null) WorldGen.corruptBG = (int)data.WorldGen_corruptBG;
+					if (data.WorldGen_jungleBG != null) WorldGen.jungleBG = (int)data.WorldGen_jungleBG;
+					if (data.WorldGen_snowBG != null) WorldGen.snowBG = (int)data.WorldGen_snowBG;
+					if (data.WorldGen_hallowBG != null) WorldGen.hallowBG = (int)data.WorldGen_hallowBG;
+					if (data.WorldGen_crimsonBG != null) WorldGen.crimsonBG = (int)data.WorldGen_crimsonBG;
+					if (data.WorldGen_desertBG != null) WorldGen.desertBG = (int)data.WorldGen_desertBG;
+					if (data.WorldGen_oceanBG != null) WorldGen.oceanBG = (int)data.WorldGen_oceanBG;
+					if (data.WorldGen_mushroomBG != null) WorldGen.mushroomBG = (int)data.WorldGen_mushroomBG;
+					if (data.WorldGen_underworldBG != null) WorldGen.underworldBG = (int)data.WorldGen_underworldBG;
 					if (!Main.hardMode && data.Main_hardMode)
 					{
 						WorldUpdateEvent.Add(1, null);
@@ -322,70 +334,73 @@ namespace MultiWorld.Common.Systems
 						WorldUpdateEvent.Add(2, data.WorldGen_altarCount - WorldGen.altarCount);
 					}
 					Main.afterPartyOfDoom = data.Main_afterPartyOfDoom;
-					Main.invasionDelay = data.Main_invasionDelay;
-					Main.invasionSize = data.Main_invasionSize;
-					Main.invasionType = data.Main_invasionType;
-					Main.invasionX = data.Main_invasionX;
-					Main.slimeRainTime = data.Main_slimeRainTime;
-					Main.sundialCooldown = data.Main_sundialCooldown;
+					if (data.Main_invasionDelay != null) Main.invasionDelay = (int)data.Main_invasionDelay;
+					if (data.Main_invasionSize != null) Main.invasionSize = (int)data.Main_invasionSize;
+					if (data.Main_invasionType != null) Main.invasionType = (int)data.Main_invasionType;
+					if (data.Main_invasionX != null) Main.invasionX = (double)data.Main_invasionX;
+					if (data.Main_slimeRainTime != null) Main.slimeRainTime = (double)data.Main_slimeRainTime;
+					if (data.Main_sundialCooldown != null) Main.sundialCooldown = (int)data.Main_sundialCooldown;
 					Main.raining = data.Main_raining;
-					Main.rainTime = data.Main_rainTime;
-					Main.maxRain = data.Main_maxRain;
-					Main.cloudBGActive = data.Main_cloudBGActive;
-					Main.cloudBGAlpha = data.Main_cloudBGAlpha;
-					Main.numClouds = data.Main_numClouds;
-					Main.windSpeedTarget = data.Main_windSpeedTarget;
-					Main.windSpeedCurrent = data.Main_windSpeedCurrent;
-					Main.anglerWhoFinishedToday = data.Main_anglerWhoFinishedToday;
-					Main.anglerQuest = data.Main_anglerQuest;
-					Main.invasionSizeStart = data.Main_invasionSizeStart;
+					if (data.Main_rainTime != null) Main.rainTime = (double)data.Main_rainTime;
+					if (data.Main_maxRain != null) Main.maxRain = (int)data.Main_maxRain;
+					if (data.Main_cloudBGActive != null) Main.cloudBGActive = (float)data.Main_cloudBGActive;
+					if (data.Main_cloudBGAlpha != null) Main.cloudBGAlpha = (float)data.Main_cloudBGAlpha;
+					if (data.Main_numClouds != null) Main.numClouds = (int)data.Main_numClouds;
+					if (data.Main_windSpeedTarget != null) Main.windSpeedTarget = (float)data.Main_windSpeedTarget;
+					if (data.Main_windSpeedCurrent != null) Main.windSpeedCurrent = (float)data.Main_windSpeedCurrent;
+					if (data.Main_anglerWhoFinishedToday != null) Main.anglerWhoFinishedToday = data.Main_anglerWhoFinishedToday;
+					if (data.Main_anglerQuest != null) Main.anglerQuest = (int)data.Main_anglerQuest;
+					if (data.Main_invasionSizeStart != null) Main.invasionSizeStart = (int)data.Main_invasionSizeStart;
 					Main.fastForwardTimeToDawn = data.Main_fastForwardTimeToDawn;
-					Main.treeBGSet1 = data.Main_treeBGSet1;
-					Main.treeBGSet2 = data.Main_treeBGSet2;
-					Main.treeBGSet3 = data.Main_treeBGSet3;
-					Main.treeBGSet4 = data.Main_treeBGSet4;
-					Main.treeMntBGSet1 = data.Main_treeMntBGSet1;
-					Main.treeMntBGSet2 = data.Main_treeMntBGSet2;
-					Main.treeMntBGSet3 = data.Main_treeMntBGSet3;
-					Main.treeMntBGSet4 = data.Main_treeMntBGSet4;
-					Main.corruptBG = data.Main_corruptBG;
-					Main.jungleBG = data.Main_jungleBG;
-					Main.snowBG = data.Main_snowBG;
-					Main.snowMntBG = data.Main_snowMntBG;
-					Main.hallowBG = data.Main_hallowBG;
-					Main.crimsonBG = data.Main_crimsonBG;
-					Main.desertBG = data.Main_desertBG;
-					Main.mushroomBG = data.Main_mushroomBG;
-					Main.underworldBG = data.Main_underworldBG;
+					if (data.Main_treeBGSet1 != null) Main.treeBGSet1 = data.Main_treeBGSet1;
+					if (data.Main_treeBGSet2 != null) Main.treeBGSet2 = data.Main_treeBGSet2;
+					if (data.Main_treeBGSet3 != null) Main.treeBGSet3 = data.Main_treeBGSet3;
+					if (data.Main_treeBGSet4 != null) Main.treeBGSet4 = data.Main_treeBGSet4;
+					if (data.Main_treeMntBGSet1 != null)Main.treeMntBGSet1 = data.Main_treeMntBGSet1;
+					if (data.Main_treeMntBGSet2 != null)Main.treeMntBGSet2 = data.Main_treeMntBGSet2;
+					if (data.Main_treeMntBGSet3 != null)Main.treeMntBGSet3 = data.Main_treeMntBGSet3;
+					if (data.Main_treeMntBGSet4 != null)Main.treeMntBGSet4 = data.Main_treeMntBGSet4;
+					if (data.Main_corruptBG != null)Main.corruptBG = data.Main_corruptBG;
+					if (data.Main_jungleBG != null)Main.jungleBG = data.Main_jungleBG;
+					if (data.Main_snowBG != null)Main.snowBG = data.Main_snowBG;
+					if (data.Main_snowMntBG != null)Main.snowMntBG = data.Main_snowMntBG;
+					if (data.Main_hallowBG != null)Main.hallowBG = data.Main_hallowBG;
+					if (data.Main_crimsonBG != null)Main.crimsonBG = data.Main_crimsonBG;
+					if (data.Main_desertBG != null)Main.desertBG = data.Main_desertBG;
+					if (data.Main_mushroomBG != null)Main.mushroomBG = data.Main_mushroomBG;
+					if (data.Main_underworldBG != null) Main.underworldBG = data.Main_underworldBG;
 					Main.forceHalloweenForToday = data.Main_forceHalloweenForToday;
 					Main.forceXMasForToday = data.Main_forceXMasForToday;
 					Main.fastForwardTimeToDusk = data.Main_fastForwardTimeToDusk;
-					Main.moondialCooldown = data.Main_moondialCooldown;
-					Main.moonType = data.Main_moonType;
+					if (data.Main_moondialCooldown != null) Main.moondialCooldown = (int)data.Main_moondialCooldown;
+					if (data.Main_moonType != null) Main.moonType = (int)data.Main_moonType;
 					Main.eclipse = data.Main_eclipse;
-					Main.time = data.Main_time;
+					if (data.Main_time != null) Main.time = (double)data.Main_time;
 					Main.dayTime = data.Main_dayTime;
-					Main.moonPhase = data.Main_moonPhase;
+					if (data.Main_moonPhase != null) Main.moonPhase = (int)data.Main_moonPhase;
 					Main.bloodMoon = data.Main_bloodMoon;
-					CultistRitual.delay = data.CultistRitual_delay;
+					if (data.CultistRitual_delay != null) CultistRitual.delay = (double)data.CultistRitual_delay;
 					BirthdayParty.ManualParty = data.BirthdayParty_ManualParty;
 					BirthdayParty.GenuineParty = data.BirthdayParty_GenuineParty;
-					BirthdayParty.PartyDaysOnCooldown = data.BirthdayParty_PartyDaysOnCooldown;
-					BirthdayParty.CelebratingNPCs = data.BirthdayParty_CelebratingNPCs;
+					if (data.BirthdayParty_PartyDaysOnCooldown != null) BirthdayParty.PartyDaysOnCooldown = (int)data.BirthdayParty_PartyDaysOnCooldown;
+					if (data.BirthdayParty_CelebratingNPCs != null) BirthdayParty.CelebratingNPCs = data.BirthdayParty_CelebratingNPCs;
 					Sandstorm.Happening = data.Sandstorm_Happening;
-					Sandstorm.TimeLeft = data.Sandstorm_TimeLeft;
-					Sandstorm.Severity = data.Sandstorm_Severity;
-					Sandstorm.IntendedSeverity = data.Sandstorm_IntendedSeverity;
-					LanternNight.LanternNightsOnCooldown = data.LanternNight_LanternNightsOnCooldown;
+					if (data.Sandstorm_TimeLeft != null) Sandstorm.TimeLeft = (double)data.Sandstorm_TimeLeft;
+					if (data.Sandstorm_Severity != null) Sandstorm.Severity = (float)data.Sandstorm_Severity;
+					if (data.Sandstorm_IntendedSeverity != null) Sandstorm.IntendedSeverity = (float)data.Sandstorm_IntendedSeverity;
+					if (data.LanternNight_LanternNightsOnCooldown != null) LanternNight.LanternNightsOnCooldown = (int)data.LanternNight_LanternNightsOnCooldown;
 					LanternNight.GenuineLanterns = data.LanternNight_GenuineLanterns;
 					LanternNight.ManualLanterns = data.LanternNight_ManualLanterns;
 					LanternNight.NextNightIsLanternNight = data.LanternNight_NextNightIsLanternNight;
 					DD2Event.DownedInvasionT1 = data.DD2Event_DownedInvasionT1;
 					DD2Event.DownedInvasionT2 = data.DD2Event_DownedInvasionT2;
 					DD2Event.DownedInvasionT3 = data.DD2Event_DownedInvasionT3;
-					typeof(NPCKillsTracker).GetField("_killCountsByNpcId", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(Main.BestiaryTracker.Kills, data.Bestiary_Kills);
-					typeof(NPCWasNearPlayerTracker).GetField("_wasSeenNearPlayerByNetId", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(Main.BestiaryTracker.Sights, data.Bestiary_wasSeenNearPlayerByNetId);
-					typeof(NPCWasChatWithTracker).GetField("_chattedWithPlayer", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(Main.BestiaryTracker.Chats, data.Bestiary_chattedWithPlayer);
+					OneBiome.HaveDungeon = data.HaveDungeon;
+					OneBiome.HaveShimmer = data.HaveShimmer;
+					OneBiome.HaveTemple = data.HaveTemple;
+					if (data.Bestiary_Kills != null) typeof(NPCKillsTracker).GetField("_killCountsByNpcId", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(Main.BestiaryTracker.Kills, data.Bestiary_Kills);
+					if (data.Bestiary_wasSeenNearPlayerByNetId != null) typeof(NPCWasNearPlayerTracker).GetField("_wasSeenNearPlayerByNetId", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(Main.BestiaryTracker.Sights, data.Bestiary_wasSeenNearPlayerByNetId);
+					if (data.Bestiary_chattedWithPlayer != null) typeof(NPCWasChatWithTracker).GetField("_chattedWithPlayer", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(Main.BestiaryTracker.Chats, data.Bestiary_chattedWithPlayer);
 				}
 			}
 		}
@@ -421,13 +436,19 @@ namespace MultiWorld.Common.Systems
 
 		public override void ModifyWorldGenTasks(List<GenPass> tasks, ref double totalWeight)
 		{
-			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+			
+			if (OneBiome.Biome != string.Empty)
 			{
-				base.ModifyWorldGenTasks(Corruption.Gens(tasks), ref totalWeight);
+				OneBiome.Reset();
+				tasks = OneBiome.GenWorld(tasks, ref totalWeight);
 			}
-			else {
-				base.ModifyWorldGenTasks(tasks, ref totalWeight);
-			}
+			base.ModifyWorldGenTasks(tasks, ref totalWeight);
+		}
+
+		public override void ModifyHardmodeTasks(List<GenPass> tasks)
+		{
+			if (OneBiome.Biome != string.Empty) tasks.Clear();
+			base.ModifyHardmodeTasks(tasks);
 		}
 
 		public void ChangeWorld()
@@ -435,15 +456,21 @@ namespace MultiWorld.Common.Systems
 			do_chaneWorld = true;
 			var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
 			var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
-			Radius = data.WorldRadius;
-			if (Radius > 0) {
-				if (Math.Abs(NextWorldIndex) > Radius) {
-					if (NextWorldIndex > 0)
+			var config = ModContent.GetInstance<Beta>();
+			if (!config.SepecialWorld) {
+				Radius = data.WorldRadius;
+				if (Radius > 0)
+				{
+					if (Math.Abs(NextWorldIndex) > Radius)
 					{
-						NextWorldIndex = -Radius;
-					}
-					else if (NextWorldIndex < 0) {
-						NextWorldIndex = Radius;
+						if (NextWorldIndex > 0)
+						{
+							NextWorldIndex = -Radius;
+						}
+						else if (NextWorldIndex < 0)
+						{
+							NextWorldIndex = Radius;
+						}
 					}
 				}
 			}
@@ -509,7 +536,6 @@ namespace MultiWorld.Common.Systems
 						WorldGen.WorldGenParam_Evil = 1;
 						break;
 				}
-				
 				Main.ActiveWorldFileData = CreateMetadata(data.optionwWorldName, nextWorld, SocialAPI.Cloud != null && SocialAPI.Cloud.EnabledByDefault, Main.GameMode);
 				if (processedSeed.Length == 0)
 					Main.ActiveWorldFileData.SetSeedToRandom();

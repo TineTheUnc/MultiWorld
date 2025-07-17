@@ -1,5 +1,5 @@
 ﻿using MultiWorld.Common.Systems;
-using MultiWorld.Common.Type;
+using MultiWorld.Common.Types;
 using System.IO;
 using System.Reflection;
 using Terraria;

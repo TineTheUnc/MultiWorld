@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
+using MultiWorld.Common.Config;
 using MultiWorld.Common.Systems;
-using MultiWorld.Common.Type;
+using MultiWorld.Common.Types;
 using MultiWorld.Common.UI;
 using System.Collections.Generic;
 using System.Reflection;
@@ -90,18 +91,31 @@ namespace MultiWorld
 			multiworldButton.OnMouseOut += ClearOptionDescription;
 			multiworldCreate.Append(multiworldButton);
 			WorldRadius = 0;
+			var config = ModContent.GetInstance<Beta>();
 			var multiworldRadius = new UINumberBox(0, 100, 0, Language.GetText("Mods.MultiWorld.UI.RadiusNumberBox").Value);
 			multiworldRadius.Top.Set(-11, 0f);
 			multiworldRadius.Left.Set(0, 0.32f);
-			multiworldRadius.OnAdd += InputUpdateNumber;
-			multiworldRadius.OnReduce += InputUpdateNumber;
-			multiworldRadius.OnMouseOver += ButtonOver;
-			multiworldRadius.OnMouseOut += ButtonOut;
+			if (!config.SepecialWorld)
+			{
+				multiworldRadius.OnAdd += InputUpdateNumber;
+				multiworldRadius.OnReduce += InputUpdateNumber;
+				multiworldRadius.OnMouseOver += ButtonOver;
+				multiworldRadius.OnMouseOut += ButtonOut;
+			}
 			multiworldRadius.OnMouseOver += (UIMouseEvent _, UIElement listeningElement) =>
 			{
+				var config = ModContent.GetInstance<Beta>();
 				var UIWorldCreation_descriptionTextInfo = typeof(UIWorldCreation).GetField("_descriptionText", BindingFlags.Instance | BindingFlags.NonPublic);
 				var UIWorldCreation_descriptionText = (UIText)UIWorldCreation_descriptionTextInfo.GetValue(Main.MenuUI.CurrentState);
-				UIWorldCreation_descriptionText.SetText(Language.GetText("Mods.MultiWorld.UI.Description.MultiWorldRadius"));
+				if (config.SepecialWorld)
+				{
+					UIWorldCreation_descriptionText.SetText(Language.GetText("Mods.MultiWorld.UI.Description.SpecialWorldRadius"));
+				}
+				else
+				{
+					UIWorldCreation_descriptionText.SetText(Language.GetText("Mods.MultiWorld.UI.Description.MultiWorldRadius"));
+				}
+
 			};
 			multiworldRadius.OnMouseOut += ClearOptionDescription;
 			multiworldCreate.Append(multiworldRadius);

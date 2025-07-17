@@ -1,5 +1,7 @@
-﻿using MultiWorld.Common.Systems;
-using MultiWorld.Common.Type;
+﻿using MultiWorld.Common.Config;
+using MultiWorld.Common.Systems;
+using MultiWorld.Common.Systems.WorldGens;
+using MultiWorld.Common.Types;
 using System;
 using System.IO;
 using System.Reflection;
@@ -9,6 +11,7 @@ using Terraria.GameContent.UI.States;
 using Terraria.ID;
 using Terraria.IO;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
 using Terraria.UI;
 
 namespace MultiWorld
@@ -18,27 +21,42 @@ namespace MultiWorld
 		private void LoadHook()
 		{
 			On_Main.GetWorldPathFromName += On_GetWorldPathFromName;
-			On_WorldGen.do_worldGenCallBack += On_do_worldGenCallBack;
 			On_Main.LoadWorlds += On_LoadWorlds;
 			On_UIWorldCreation.FinishCreatingWorld += On_FinishCreatingWorld;
 			On_UIWorldListItem.DeleteButtonClick += On_DeleteButtonClick;
 			On_WorldFileData.OnWorldRenameSuccess += On_OnWorldRenameSuccess;
 			On_Player.ChangeSpawn += On_Player_ChangeSpawn;
 			On_Player.RemoveSpawn += On_Player_RemoveSpawn;
+			On_WorldGen.oceanDepths += On_WorldGen_oceanDepths;
 		}
 
 		private void UnloadHook()
 		{
 			On_Main.GetWorldPathFromName -= On_GetWorldPathFromName;
-			On_WorldGen.do_worldGenCallBack -= On_do_worldGenCallBack;
 			On_Main.LoadWorlds -= On_LoadWorlds;
 			On_UIWorldCreation.FinishCreatingWorld -= On_FinishCreatingWorld;
 			On_UIWorldListItem.DeleteButtonClick -= On_DeleteButtonClick;
 			On_WorldFileData.OnWorldRenameSuccess -= On_OnWorldRenameSuccess;
 			On_Player.ChangeSpawn -= On_Player_ChangeSpawn;
 			On_Player.RemoveSpawn -= On_Player_RemoveSpawn;
+			On_WorldGen.oceanDepths -= On_WorldGen_oceanDepths;
 		}
 
+		private bool On_WorldGen_oceanDepths(On_WorldGen.orig_oceanDepths orig, int x, int y)
+		{
+			var orig_data =  orig( x,  y);
+			if (OneBiome.Biome != string.Empty)
+			{
+				if (OneBiome.Biome == "Ocean")
+				{
+					return y <= WorldGen.oceanLevel;
+				}
+				else {
+					return false;
+				}
+			}
+			return orig_data;
+		}
 
 		private void On_Player_RemoveSpawn(On_Player.orig_RemoveSpawn orig, Player self)
 		{
@@ -48,7 +66,6 @@ namespace MultiWorld
 				var entityIdInfo = self.GetType().GetField("entityId", BindingFlags.Instance | BindingFlags.NonPublic);
 				var entityId = (long)entityIdInfo.GetValue(self);
 				var data = MultiWorldFileData.LoadMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"));
-				data ??= MultiWorldFileData.CreateMetaData();
 				data.spawnPoint?.Remove(entityId);
 				MultiWorldFileData.SaveMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"), data);
 			}
@@ -62,7 +79,6 @@ namespace MultiWorld
 				var entityIdInfo = self.GetType().GetField("entityId", BindingFlags.Instance | BindingFlags.NonPublic);
 				var entityId = (long)entityIdInfo.GetValue(self);
 				var data = MultiWorldFileData.LoadMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"));
-				data ??= MultiWorldFileData.CreateMetaData();
 				data.spawnPoint?.Add(entityId, int.Parse(Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path)));
 				MultiWorldFileData.SaveMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"), data);
 			}
@@ -96,6 +112,7 @@ namespace MultiWorld
 		{
 			orig(self);
 			var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+			OneBiome.Biome = string.Empty;
 			if (worldManageSystem.CreateMultiWorld)
 			{
 				var optionSeedInfo = self.GetType().GetField("_optionSeed", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -118,23 +135,22 @@ namespace MultiWorld
 				MetaData.optionEvil = (WorldEvilId)Enum.Parse(typeof(WorldEvilId), optionEvil.ToString()); ;
 				MetaData.optionwWorldName = optionwWorldName;
 				MetaData.WorldRadius = WorldRadius;
+				MetaData.spawnPoint.Add(0, 0);
 				WorldRadius = 0;
-			}
-
-		}
-
-		private void On_do_worldGenCallBack(On_WorldGen.orig_do_worldGenCallBack orig, object threadContext)
-		{
-			orig(threadContext);
-			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
-			{
-				var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
-				if (!File.Exists(Path.Combine(directory, "meta.world")))
+				var config = ModContent.GetInstance<Beta>();
+				if (config.SepecialWorld)
 				{
+					OneBiome.Biome = "Forest";
+				}
+				if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+				{
+					var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
 					MultiWorldFileData.SaveMeta(Path.Combine(directory, "meta.world"), MetaData);
 				}
 			}
+
 		}
+
 
 		private string On_GetWorldPathFromName(On_Main.orig_GetWorldPathFromName orig, string worldName, bool cloudSave)
 		{

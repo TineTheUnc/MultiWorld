@@ -1,6 +1,6 @@
 ﻿using MonoMod.Cil;
 using MultiWorld.Common.Systems;
-using MultiWorld.Common.Type;
+using MultiWorld.Common.Types;
 using System;
 using System.Reflection;
 using Mono.Cecil.Cil;

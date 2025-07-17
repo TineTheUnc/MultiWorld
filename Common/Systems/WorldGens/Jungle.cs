@@ -13,7 +13,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 {
 	public class Jungle
 	{
-		public List<string> removeList = [
+		public static List<string> removeList = [
 				"Dunes",
 				"Ocean Sand",
 				"Sand Patches",
@@ -34,30 +34,46 @@ namespace MultiWorld.Common.Systems.WorldGens
 				"Jungle"
 		];
 
-		public List<GenPass> Gens(List<GenPass> tasks)
+		public static List<GenPass> Gens(List<GenPass> tasks, ref double totalWeight)
 		{
-			var system = ModContent.GetInstance<WorldManageSystem>();
-			system.Shimmer = false;
-			system.Evil = 0;
+			OneBiome.Shimmer = false;
+			OneBiome.Evil = 0;
+			OneBiome.Biome = "Jungle";
 			foreach (string item in removeList)
 			{
 				int index = tasks.FindIndex(genpass => genpass.Name.Equals(item));
 				if (index != -1)
 				{
+					double loadWeight = tasks[index].Weight;
 					tasks.Remove(tasks[index]);
 					if (item == "Buried Chests")
 					{
-						tasks.Insert(index, new CommonGen.BuriedChestPass(false));
+						tasks.Insert(index, new OneBiome.BuriedChestPass(false, loadWeight));
 					}
 					else if (item == "Jungle") {
-						tasks.Insert(index, new JunglePass());
+						tasks.Insert(index, new JunglePass(loadWeight));
 					}
+				}
+			}
+			int temple = tasks.FindIndex(genpass => genpass.Name.Equals("Temple"));
+			int jungle_temple = tasks.FindIndex(genpass => genpass.Name.Equals("Jungle Temple"));
+			if (OneBiome.HaveTemple)
+			{
+				tasks.Remove(tasks[temple]);
+				tasks.Remove(tasks[jungle_temple]);
+			}
+			else
+			{
+				if (WorldGen.genRand.NextBool(9, 10))
+				{
+					tasks.Remove(tasks[temple]);
+					tasks.Remove(tasks[jungle_temple]);
 				}
 			}
 			return tasks;
 		}
 
-		public class JunglePass() : GenPass("Jungle", 10154.65234375)
+		public class JunglePass(double loadWeight) : GenPass("Jungle", loadWeight)
 		{
 
 			protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration)
