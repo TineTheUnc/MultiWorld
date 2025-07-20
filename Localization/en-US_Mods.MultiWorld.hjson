@@ -23,5 +23,55 @@ Configs: {
 			Label: Sepecial World
 			Tooltip: Use sepecial world generate for create world.
 		}
+
+		Headers: {
+			BiomeChance: Biome Chance
+			StructureChance: Structure Chance
+		}
+
+		ForestChance: {
+			Label: Forest Chance
+			Tooltip: Forest biome spawn chance
+		}
+
+		DesertChance: {
+			Label: Desert Chance
+			Tooltip: Desert biome spawn chance
+		}
+
+		JungleChance: {
+			Label: Jungle Chance
+			Tooltip: Jungle biome spawn chance
+		}
+
+		SnowChance: {
+			Label: Snow Chance
+			Tooltip: Snow biome spawn chance
+		}
+
+		OceanChance: {
+			Label: Ocean Chance
+			Tooltip: Ocean biome spawn chance
+		}
+
+		EvilChance: {
+			Label: Eveil Chance
+			Tooltip: Evil biome spawn chance
+		}
+
+		DungeonChance: {
+			Label: Dungeon Chance
+			Tooltip: Dungeon spawn chance
+		}
+
+		TempleChance: {
+			Label: Temple Chance
+			Tooltip: Temple spawn chance
+		}
+
+		ShimmerChance: {
+			Label: Shimmer Chance
+			Tooltip: Shimmer spawn chance
+		}
 	}
 }

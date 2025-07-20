@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using MonoMod.Cil;
 using MonoMod.Core.Platforms;
+using MultiWorld.Common.Config;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -49,7 +51,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 			"Buried Chests",
 		];
 
-		public static List<GenPass> Gens(List<GenPass> tasks, bool first, ref double totalWeight) {
+		public static List<GenPass> Gens(List<GenPass> tasks, ref double totalWeight) {
 			OneBiome.Shimmer = false;
 			OneBiome.Evil = 0;
 			OneBiome.Biome = "Forest";
@@ -66,7 +68,8 @@ namespace MultiWorld.Common.Systems.WorldGens
 					}
 				}
 			}
-			if (first)
+			var i = Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path);
+			if (i == "0")
 			{
 				int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
 				tasks.Remove(tasks[dungeon]);
@@ -75,15 +78,19 @@ namespace MultiWorld.Common.Systems.WorldGens
 			}
 			else {
 				int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
+				var config = ModContent.GetInstance<Beta>();
 				if (OneBiome.HaveDungeon)
 				{
 					tasks.Remove(tasks[dungeon]);
 				}
 				else
 				{
-					if (!WorldGen.genRand.NextBool(9, 10))
+					if (!WorldGen.genRand.NextBool(config.DungeonChance, 10))
 					{
 						tasks.Remove(tasks[dungeon]);
+					}
+					else {
+						OneBiome.HaveDungeon = true;
 					}
 				}
 				int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
@@ -93,9 +100,12 @@ namespace MultiWorld.Common.Systems.WorldGens
 				}
 				else
 				{
-					if (!WorldGen.genRand.NextBool(9, 10))
+					if (!WorldGen.genRand.NextBool(config.ShimmerChance, 10))
 					{
 						tasks.Remove(tasks[shimmer]);
+					}
+					else {
+						OneBiome.HaveShimmer = true;
 					}
 				}
 			}

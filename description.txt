@@ -55,6 +55,14 @@ Can turn on in mod config.
 In this world generate type one map will hame only one biome and structures will random spawn.
 Not support hardmode.
 
+V0.10
+- Bug fix.
+- Add config for sepecial world generate in mod config.
+- Add modding support for sepecial world generate.
+In OneBiome class. 
+Add you world generate to static Dictionary<string, GenFunc> Biomes.
+And subscribe static event OnRandomGenHandler OnRandomGen for add your biome generate chance.
+
 Not found any bug in testing but i can't test in every case. (be careful)
 
 You can support me with your money if you need : https://ko-fi.com/tine2548

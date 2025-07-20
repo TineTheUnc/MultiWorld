@@ -1,6 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.Build.Framework;
+using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MultiWorld.Common.Config;
 using MultiWorld.Common.Types;
 using ReLogic.Utilities;
 using System;
@@ -15,6 +17,7 @@ using Terraria.GameContent.Biomes;
 using Terraria.GameContent.Generation;
 using Terraria.IO;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
 using Terraria.WorldBuilding;
 
 namespace MultiWorld.Common.Systems.WorldGens
@@ -28,14 +31,17 @@ namespace MultiWorld.Common.Systems.WorldGens
 		public static bool HaveDungeon = false;
 		public static bool HaveTemple = false;
 		public static bool HaveShimmer = false;
-		public static List<string> Biomes = new()
+		public delegate List<GenPass> GenFunc(List<GenPass> tasks, ref double totalWeight);
+		public delegate Dictionary<string, int> OnRandomGenHandler(Dictionary<string, int> BiomesChance);
+		public static event OnRandomGenHandler OnRandomGen;
+		public static Dictionary<string, GenFunc> Biomes = new()
 		{
-			"Forest",
-			"Desert",
-			"Jungle",
-			"Corruption",
-			"Snow",
-			"Ocean"
+			{ "Forest" , Forest.Gens},
+			{ "Desert", Desert.Gens},
+			{ "Jungle", Jungle.Gens},
+			{ "Corruption", Corruption.Gens},
+			{ "Snow", Snow.Gens},
+			{ "Ocean", Ocean.Gens},
 		};
 		public static void Reset()
 		{
@@ -43,11 +49,27 @@ namespace MultiWorld.Common.Systems.WorldGens
 			Evil = 0;
 		}
 
+		public static string RandomGen(Dictionary<string, int> BiomesChance)
+		{
+			int totalWeight = BiomesChance.Values.Sum();
+			int roll = WorldGen.genRand.Next(0, totalWeight);
+			int cumulative = 0;
+
+			foreach (var kvp in BiomesChance)
+			{
+				cumulative += kvp.Value;
+				if (roll<cumulative)
+					return kvp.Key;
+			}
+
+			throw new InvalidOperationException("Random roll failed");
+		}
+
 		public static List<GenPass> GenWorld(List<GenPass> tasks, ref double totalWeight) {
 			var index = Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path);
 			if (index == "0")
 			{
-				Forest.Gens(tasks, true,ref totalWeight);
+				Forest.Gens(tasks,ref totalWeight);
 			}
 			else
 			{
@@ -56,18 +78,24 @@ namespace MultiWorld.Common.Systems.WorldGens
 				int j = tasks.FindIndex(genpass => genpass.Name.Equals("Guide"));
 				tasks.Remove(tasks[j]);
 				Biome = string.Empty;
-				Random random = new();
-				string randomBar = Biomes.OrderBy(s => random.NextDouble()).First();
-				tasks = randomBar switch
-				{
-					"Forest" => Forest.Gens(tasks, false, ref totalWeight),
-					"Desert" => Desert.Gens(tasks, ref totalWeight),
-					"Jungle" => Jungle.Gens(tasks, ref totalWeight),
-					"Corruption" => Corruption.Gens(tasks, ref totalWeight),
-					"Snow" => Snow.Gens(tasks, ref totalWeight),
-					"Ocean"=> Ocean.Gens(tasks, ref totalWeight),
-					_ => Forest.Gens(tasks, false, ref totalWeight),
+				var config = ModContent.GetInstance<Beta>();
+				Dictionary<string, int> BiomesChance = new(){
+					{ "Forest",config.ForestChance },
+					{ "Desert",config.DesertChance },
+					{ "Jungle",config.JungleChance },
+					{ "Corruption",config.EvilChance },
+					{ "Snow",config.SnowChance },
+					{ "Ocean",config.OceanChance }
 				};
+				if (OnRandomGen != null)
+				{
+					foreach (OnRandomGenHandler handler in OnRandomGen.GetInvocationList().Cast<OnRandomGenHandler>())
+					{
+						BiomesChance = handler(BiomesChance);
+					}
+				}
+				var bio = RandomGen(BiomesChance);
+				tasks = Biomes[bio](tasks, ref totalWeight);
 			}
 			return tasks;
 		}

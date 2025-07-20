@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using MonoMod.Core.Platforms;
+using MultiWorld.Common.Config;
 using ReLogic.Utilities;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 			}
 			int temple = tasks.FindIndex(genpass => genpass.Name.Equals("Temple"));
 			int jungle_temple = tasks.FindIndex(genpass => genpass.Name.Equals("Jungle Temple"));
+			
 			if (OneBiome.HaveTemple)
 			{
 				tasks.Remove(tasks[temple]);
@@ -64,10 +66,14 @@ namespace MultiWorld.Common.Systems.WorldGens
 			}
 			else
 			{
-				if (!WorldGen.genRand.NextBool(9, 10))
+				var config = ModContent.GetInstance<Beta>();
+				if (!WorldGen.genRand.NextBool(config.TempleChance, 10))
 				{
 					tasks.Remove(tasks[temple]);
 					tasks.Remove(tasks[jungle_temple]);
+				}
+				else {
+					OneBiome.HaveTemple = true;
 				}
 			}
 			return tasks;
