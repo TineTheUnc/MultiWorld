@@ -30,14 +30,16 @@ namespace MultiWorld.Common.Types
 	}
 
 	[JsonObject(MemberSerialization.Fields)]
-	public class MetaData 
+	public class MetaData
 	{
 		public string optionSeed = string.Empty;
 		public WorldSizeId optionSize;
 		public WorldDifficultyId optionDifficulty;
 		public WorldEvilId optionEvil;
 		public string optionwWorldName = string.Empty;
-		public Dictionary<long, int> spawnPoint = [];
+		public Dictionary<long, int> spawnPoint = new() {
+			{ 0,0 }
+		};
 		public int WorldRadius = 0;
 		public bool NPC_downedBoss1;
 		public bool NPC_downedBoss2;

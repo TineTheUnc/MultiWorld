@@ -53,6 +53,7 @@ V0.9
 - New world generate type (Beta).
 Can turn on in mod config.
 In this world generate type one map will hame only one biome and structures will random spawn.
+Not support hardmode.
 
 Not found any bug in testing but i can't test in every case. (be careful)
 

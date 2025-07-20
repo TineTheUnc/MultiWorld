@@ -63,8 +63,6 @@ namespace MultiWorld.Common.Types
 				var worldFileData = new WorldFileData(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path), "0.wld"), false);
 				data.optionSeed = worldFileData.SeedText;
 				data.optionwWorldName = worldFileData.Name;
-				data.WorldRadius = 0;
-				data.spawnPoint.Add(0, 0);
 				if (worldFileData.WorldSizeX == 4200 && worldFileData.WorldSizeY == 1200)
 				{
 					data.optionSize = WorldSizeId.Small;
@@ -103,7 +101,14 @@ namespace MultiWorld.Common.Types
 				{
 					data.optionDifficulty = WorldDifficultyId.Normal;
 				}
-				data.optionEvil = WorldEvilId.Random;
+				if (worldFileData.HasCrimson)
+				{
+					data.optionEvil = WorldEvilId.Crimson;
+				}
+				else {
+					data.optionEvil = WorldEvilId.Corruption;
+				}
+				data.Main_hardMode = worldFileData.IsHardMode;
 				return data;
 			} 
 		}

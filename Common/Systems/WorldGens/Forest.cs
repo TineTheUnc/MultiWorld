@@ -81,7 +81,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				}
 				else
 				{
-					if (WorldGen.genRand.NextBool(9, 10))
+					if (!WorldGen.genRand.NextBool(9, 10))
 					{
 						tasks.Remove(tasks[dungeon]);
 					}
@@ -93,7 +93,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				}
 				else
 				{
-					if (WorldGen.genRand.NextBool(9, 10))
+					if (!WorldGen.genRand.NextBool(9, 10))
 					{
 						tasks.Remove(tasks[shimmer]);
 					}

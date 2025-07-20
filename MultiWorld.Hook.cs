@@ -135,7 +135,6 @@ namespace MultiWorld
 				MetaData.optionEvil = (WorldEvilId)Enum.Parse(typeof(WorldEvilId), optionEvil.ToString()); ;
 				MetaData.optionwWorldName = optionwWorldName;
 				MetaData.WorldRadius = WorldRadius;
-				MetaData.spawnPoint.Add(0, 0);
 				WorldRadius = 0;
 				var config = ModContent.GetInstance<Beta>();
 				if (config.SepecialWorld)

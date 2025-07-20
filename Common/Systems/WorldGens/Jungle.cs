@@ -64,7 +64,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 			}
 			else
 			{
-				if (WorldGen.genRand.NextBool(9, 10))
+				if (!WorldGen.genRand.NextBool(9, 10))
 				{
 					tasks.Remove(tasks[temple]);
 					tasks.Remove(tasks[jungle_temple]);
