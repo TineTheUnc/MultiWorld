@@ -63,6 +63,11 @@ In OneBiome class.
 Add you world generate to static Dictionary<string, GenFunc> Biomes.
 And subscribe static event OnRandomGenHandler OnRandomGen for add your biome generate chance.
 
+V0.11
+- Add extension field in MetaData class for modding support.
+Use public void SetExtensionData(string key, object value) for set extension data.
+Use public T GetExtensionData<T>(string key) for get extension data.
+
 Not found any bug in testing but i can't test in every case. (be careful)
 
 You can support me with your money if you need : https://ko-fi.com/tine2548

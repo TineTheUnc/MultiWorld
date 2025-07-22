@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -192,5 +193,80 @@ namespace MultiWorld.Common.Types
 		public bool HaveDungeon = false;
 		public bool HaveTemple = false;
 		public bool HaveShimmer = false;
+		private Dictionary<string, object> _extensionData = [];
+
+		public void SetExtensionData(string key, object value)
+		{
+			if (string.IsNullOrEmpty(key))
+			{
+				throw new ArgumentException("Key cannot be null or empty.", nameof(key));
+			}
+			if (value == null)
+			{
+				_extensionData.Remove(key);
+			}
+			else
+			{
+				_extensionData[key] = value;
+			}
+		}
+
+		public void SetExtensionData<T>(string key, T value)
+		{
+			if (string.IsNullOrEmpty(key))
+			{
+				throw new ArgumentException("Key cannot be null or empty.", nameof(key));
+			}
+			if (value == null)
+			{
+				_extensionData.Remove(key);
+			}
+			else
+			{
+				_extensionData[key] = value;
+			}
+		}
+
+		public object GetExtensionData(string key)
+		{
+			if (string.IsNullOrEmpty(key))
+			{
+				throw new ArgumentException("Key cannot be null or empty.", nameof(key));
+			}
+			if (_extensionData.TryGetValue(key, out var value))
+			{
+				return value;
+			}
+			return default;
+		}
+
+		public T GetExtensionData<T>(string key)
+		{
+			if (string.IsNullOrEmpty(key))
+			{
+				throw new ArgumentException("Key cannot be null or empty.", nameof(key));
+			}
+			if (_extensionData.TryGetValue(key, out var value))
+			{
+				if (value is JObject jObject)
+					return jObject.ToObject<T>();
+
+				if (value is JArray jArray)
+					return jArray.ToObject<T>();
+
+				if (value is T tValue)
+					return tValue;
+
+				try
+				{
+					return (T)Convert.ChangeType(value, typeof(T));
+				}
+				catch
+				{
+					return default;
+				}
+			}
+			return default;
+		}
 	}
 }
