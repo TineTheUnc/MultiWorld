@@ -225,9 +225,9 @@ namespace MultiWorld.Common.Systems
 				data.Bestiary_wasSeenNearPlayerByNetId = _wasSeenNearPlayerByNetId;
 				data.Bestiary_chattedWithPlayer = _chattedWithPlayer;
 				data.SaveFrom = Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path);
-				data.HaveDungeon = OneBiome.HaveDungeon;
-				data.HaveShimmer = OneBiome.HaveShimmer;
-				data.HaveTemple = OneBiome.HaveTemple;
+				data.HaveDungeon = OneBiome.HaveDungeonGen;
+				data.HaveShimmer = OneBiome.HaveShimmerGen;
+				data.HaveTemple = OneBiome.HaveTempleGen;
 				MultiWorldFileData.SaveMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"), data);
 			}
 			base.OnWorldUnload();
@@ -447,7 +447,9 @@ namespace MultiWorld.Common.Systems
 
 		public override void ModifyHardmodeTasks(List<GenPass> tasks)
 		{
-			if (OneBiome.Biome != string.Empty) tasks.Clear();
+			if (OneBiome.Biome != string.Empty) {
+				OneBiome.GenHardMode(tasks);
+			}
 			base.ModifyHardmodeTasks(tasks);
 		}
 

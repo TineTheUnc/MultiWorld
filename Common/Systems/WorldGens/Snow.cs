@@ -119,6 +119,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 			protected override void ApplyPass(GenerationProgress progress, GameConfiguration passConfig) {
 				for (int num750 = GenVars.snowTop; num750 < GenVars.snowBottom; num750++)
 				{
+					progress.Set(num750 / GenVars.snowBottom);
 					for (int num751 = GenVars.snowMinX[num750]; num751 < GenVars.snowMaxX[num750]; num751++)
 					{
 						ushort num755 = Main.tile[num751, num750].TileType;

@@ -29,6 +29,18 @@ namespace MultiWorld.Common.Config
 		[Range(1, 10)]
 		public int EvilChance { get; set; }
 
+		[Header("HardModeChance")]
+		[DefaultValue(1)]
+		[Range(1, 10)]
+		public int EvilHardModeChance { get; set; }
+		[DefaultValue(1)]
+		[Range(1, 10)]
+		public int HallowHardModeChance { get; set; }
+		[DefaultValue(9)]
+		[Range(1, 10)]
+		public int NoneGenChance { get; set; }
+
+
 		[Header("StructureChance")]
 		[DefaultValue(9)]
 		[Range(1, 10)]

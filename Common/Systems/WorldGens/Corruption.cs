@@ -52,7 +52,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 
 		public static List<GenPass> Gens(List<GenPass> tasks, ref double totalWeight)
 		{
-			OneBiome.Biome = "Corruption";
+			OneBiome.Biome = "Evil";
 			OneBiome.Shimmer = false;
 			foreach (string item in removeList)
 			{
@@ -223,13 +223,8 @@ namespace MultiWorld.Common.Systems.WorldGens
 							while (!flag52)
 							{
 								num807++;
-								int num809 = WorldGen.genRand.Next(num794 - num808, num795 + num808);
+								int num809 = WorldGen.genRand.Next(num794, (num795 - 500) + num808);
 								int num810 = WorldGen.genRand.Next((int)(Main.worldSurface - (double)(num808 / 2)), (int)(Main.worldSurface + 100.0 + (double)num808));
-								while (WorldGen.oceanDepths(num809, num810))
-								{
-									num809 = WorldGen.genRand.Next(num794 - num808, num795 + num808);
-									num810 = WorldGen.genRand.Next((int)(Main.worldSurface - (double)(num808 / 2)), (int)(Main.worldSurface + 100.0 + (double)num808));
-								}
 								if (num807 > 100)
 								{
 									num808++;
@@ -281,7 +276,6 @@ namespace MultiWorld.Common.Systems.WorldGens
 						int num815 = num779;
 						double value16 = (double)num811 / num787;
 						progress.Set(value16);
-						bool flag53 = false;
 						int num816 = ((!WorldGen.drunkWorldGen) ? WorldGen.genRand.Next(100, Main.maxTilesX - 100) : (GenVars.crimsonLeft ? WorldGen.genRand.Next((int)((double)Main.maxTilesX * 0.5), Main.maxTilesX - 100) : WorldGen.genRand.Next(100, (int)((double)Main.maxTilesX * 0.5))));
 						int num817 = 0;
 						int num821 = 0;

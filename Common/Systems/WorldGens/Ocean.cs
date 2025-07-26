@@ -147,23 +147,16 @@ namespace MultiWorld.Common.Systems.WorldGens
 
 						int num736 = 0;
 						double num737 = 1.0;
-						GenVars.shellStartXLeft = 0;
+						GenVars.shellStartXLeft = num734;
 						GenVars.shellStartYLeft = num738;
 						num738 += WorldGen.genRand.Next(1, 5);
 						for (int num739 = num734 - 1; num739 >= num733; num739--)
 						{
-							if (num739 > 30)
-							{
-								num736++;
-								num737 = (double)TuneOceanDepthInfo.Invoke(null, [num736, num737, floridaStyle]);
-							}
-							else
-							{
-								num737 += 1.0;
-							}
+							num736++;
+							num737 = (double)TuneOceanDepthInfo.Invoke(null, [num736, num737, floridaStyle]) ;
 
 							int num740 = WorldGen.genRand.Next(15, 20);
-							for (int num741 = (int)Main.worldSurface / 2; (double)num741 < (double)num738 + num737 + (double)num740; num741++)
+							for (int num741 = (int)Main.worldSurface / 2 + 20; (double)num741 < (double)num738 + num737 + (double)num740; num741++)
 							{
 								if ((double)num741 < (double)num738 + num737 * 0.75 - 3.0)
 								{
@@ -179,8 +172,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 									else if (num741 == num738)
 									{
 										Main.tile[num739, num741].LiquidAmount = 127;
-										if (GenVars.shellStartXLeft == 0)
-											GenVars.shellStartXLeft = num739;
+										if (GenVars.shellStartXLeft == num734) GenVars.shellStartXLeft = num739;
 									}
 								}
 								else if (num741 > num738)
@@ -202,23 +194,16 @@ namespace MultiWorld.Common.Systems.WorldGens
 						int num744 = 0;
 						int num745 = num738;
 
-						GenVars.shellStartXRight = 0;
+						GenVars.shellStartXRight = num733;
 						GenVars.shellStartYRight = num745;
 						num745 += WorldGen.genRand.Next(1, 5);
 						for (int num746 = num733; num746 < num734; num746++)
 						{
-							if (num746 < num734 - 30)
-							{
-								num744++;
-								num743 = (double)TuneOceanDepthInfo.Invoke(null, [num744, num743, floridaStyle2]);
-							}
-							else
-							{
-								num743 += 1.0;
-							}
+							num744++;
+							num743 = (double)TuneOceanDepthInfo.Invoke(null, [num744, num743, floridaStyle2]);
 
 							int num747 = WorldGen.genRand.Next(15, 20);
-							for (int num748 = (int)Main.worldSurface / 2; (double)num748 < (double)num745 + num743 + (double)num747; num748++)
+							for (int num748 = (int)Main.worldSurface / 2 + 20; (double)num748 < (double)num745 + num743 + (double)num747; num748++)
 							{
 								if ((double)num748 < (double)num745 + num743 * 0.75 - 3.0)
 								{
@@ -234,8 +219,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 									else if (num748 == num745)
 									{
 										Main.tile[num746, num748].LiquidAmount = 127;
-										if (GenVars.shellStartXRight == 0)
-											GenVars.shellStartXRight = num746;
+										if (GenVars.shellStartXRight == num733) GenVars.shellStartXRight = num746;
 									}
 								}
 								else if (num748 > num745)

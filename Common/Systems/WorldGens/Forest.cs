@@ -90,7 +90,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 						tasks.Remove(tasks[dungeon]);
 					}
 					else {
-						OneBiome.HaveDungeon = true;
+						OneBiome.HaveDungeonGen = true;
 					}
 				}
 				int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
@@ -105,7 +105,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 						tasks.Remove(tasks[shimmer]);
 					}
 					else {
-						OneBiome.HaveShimmer = true;
+						OneBiome.HaveShimmerGen = true;
 					}
 				}
 			}

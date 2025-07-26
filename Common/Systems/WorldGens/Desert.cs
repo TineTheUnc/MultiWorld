@@ -49,7 +49,8 @@ namespace MultiWorld.Common.Systems.WorldGens
 			"Marble",
 			"Granite",
 			"Silt",
-			"Full Desert"
+			"Full Desert",
+			"Wall Variety"
 		];
 
 		public static List<GenPass> Gens(List<GenPass> tasks, ref double totalWeight)
@@ -91,8 +92,9 @@ namespace MultiWorld.Common.Systems.WorldGens
 				int[] x16 = new int[count];
 				for (int c = 0; c < count; c++)
 				{
+					progress.Set(c / count);
 					int num958 = 0;
-					int num960 = WorldGen.genRand.Next(300, Main.maxTilesX-300);
+					int num960 = WorldGen.genRand.Next(500, Main.maxTilesX-500);
 					int num961 = WorldGen.genRand.Next(num960) / 8;
 					num961 += num960 / 8;
 					x16[c] = num960 + num961;
@@ -188,6 +190,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 			{
 				for (int i = 0; i < Main.maxTilesX - 1; i++)
 				{
+					progress.Set(i / Main.maxTilesX);
 					var num1 = WorldGen.genRand.Next(1, 10);
 					for (int j = GenVars.lavaLine - num1; j > 1; j--)
 					{

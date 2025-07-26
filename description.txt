@@ -3,7 +3,7 @@ use WorldMirror at left and right side of world.
 it will create new world and teleport player to new world.
 you can generate worlds until your drive full.
 
-You can play normal world and can setting in mod config for switch world create between normal world and multi world.
+You can play normal world and can switch world create between normal world and multi world in world creation UI.
 
 !!! This mod is beta version it can have some problem.
 !!! Don't use in multiplayer.
@@ -60,13 +60,21 @@ V0.10
 - Add config for sepecial world generate in mod config.
 - Add modding support for sepecial world generate.
 In OneBiome class. 
-Add you world generate to static Dictionary<string, GenFunc> Biomes.
+Add your world generate to static Dictionary<string, GenFunc> Biomes.
 And subscribe static event OnRandomGenHandler OnRandomGen for add your biome generate chance.
 
 V0.11
 - Add extension field in MetaData class for modding support.
 Use public void SetExtensionData(string key, object value) for set extension data.
 Use public T GetExtensionData<T>(string key) for get extension data.
+
+v0.12
+- Bug fix.
+- Add hardmode gen for sepecial world.
+- Add config for sepecial hardmode generate in mod config.
+- Add Add modding support for sepecial hardmode generate.
+Add your hardmode generate to static Dictionary<string, HardmodeFunc> HardModeBiomes.
+And subscribe static event OnRandomGenHandler OnRandomGen for add your hardmode biome generate chance.
 
 Not found any bug in testing but i can't test in every case. (be careful)
 

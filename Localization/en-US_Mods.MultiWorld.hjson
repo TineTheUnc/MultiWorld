@@ -27,6 +27,7 @@ Configs: {
 		Headers: {
 			BiomeChance: Biome Chance
 			StructureChance: Structure Chance
+			HardModeChance: Hard Mode Chance
 		}
 
 		ForestChance: {
@@ -72,6 +73,21 @@ Configs: {
 		ShimmerChance: {
 			Label: Shimmer Chance
 			Tooltip: Shimmer spawn chance
+		}
+
+		EvilHardModeChance: {
+			Label: EvilHardMode Chance
+			Tooltip: Chance for gen evil in hardmode
+		}
+
+		HallowHardModeChance: {
+			Label: HallowHardMode Chance
+			Tooltip: Chance for gen hallow in hardmode
+		}
+
+		NoneGenChance: {
+			Label: NoneGen Chance
+			Tooltip: Chance for not gen hardmode
 		}
 	}
 }

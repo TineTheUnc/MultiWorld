@@ -31,10 +31,14 @@ namespace MultiWorld.Common.Systems.WorldGens
 		public static bool HaveDungeon = false;
 		public static bool HaveTemple = false;
 		public static bool HaveShimmer = false;
+		public static bool HaveDungeonGen = false;
+		public static bool HaveTempleGen = false;
+		public static bool HaveShimmerGen = false;
 		public delegate List<GenPass> GenFunc(List<GenPass> tasks, ref double totalWeight);
-		public delegate Dictionary<string, int> OnRandomGenHandler(Dictionary<string, int> BiomesChance);
+		public delegate List<GenPass> HardmodeFunc(List<GenPass> tasks);
+		public delegate Dictionary<string, int> OnRandomGenHandler(Dictionary<string, int> BiomesChance,bool HardMode = false);
 		public static event OnRandomGenHandler OnRandomGen;
-		public static Dictionary<string, GenFunc> Biomes = new()
+		public static Dictionary<string, GenFunc> WorldBiomes = new()
 		{
 			{ "Forest" , Forest.Gens},
 			{ "Desert", Desert.Gens},
@@ -43,10 +47,19 @@ namespace MultiWorld.Common.Systems.WorldGens
 			{ "Snow", Snow.Gens},
 			{ "Ocean", Ocean.Gens},
 		};
+		public static Dictionary<string, HardmodeFunc> HardModeBiomes = new()
+		{
+			{ "Good" , GoodHardMode.Gens},
+			{ "Evil", EvilHardMode.Gens},
+			{ "None", NoneGaneHardmode.Gens},
+		};
 		public static void Reset()
 		{
 			Shimmer = true;
 			Evil = 0;
+			HaveDungeonGen = HaveDungeon;
+			HaveTemple = HaveTempleGen;
+			HaveShimmer = HaveShimmerGen;
 		}
 
 		public static string RandomGen(Dictionary<string, int> BiomesChance)
@@ -54,8 +67,8 @@ namespace MultiWorld.Common.Systems.WorldGens
 			int totalWeight = BiomesChance.Values.Sum();
 			int roll = WorldGen.genRand.Next(0, totalWeight);
 			int cumulative = 0;
-
-			foreach (var kvp in BiomesChance)
+			var shuffled = BiomesChance.OrderBy(x => WorldGen.genRand.Next());
+			foreach (var kvp in shuffled)
 			{
 				cumulative += kvp.Value;
 				if (roll<cumulative)
@@ -95,7 +108,42 @@ namespace MultiWorld.Common.Systems.WorldGens
 					}
 				}
 				var bio = RandomGen(BiomesChance);
-				tasks = Biomes[bio](tasks, ref totalWeight);
+				tasks = WorldBiomes[bio](tasks, ref totalWeight);
+			}
+			return tasks;
+		}
+
+		public static List<GenPass> GenHardMode(List<GenPass> tasks)
+		{
+			var index = Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path);
+			if (index == "0" || OneBiome.Biome == "Jungle")
+			{
+				tasks = NoneGaneHardmode.Gens(tasks);
+			} 
+			else
+			{
+				if (OneBiome.Biome == "Evil")
+				{
+					tasks = EvilHardMode.Gens(tasks);
+				}
+				else
+				{
+					var config = ModContent.GetInstance<Beta>();
+					Dictionary<string, int> HardmodeChance = new(){
+						{ "Good" , config.HallowHardModeChance},
+						{ "Evil", config.EvilChance},
+						{ "None", config.NoneGenChance},
+					};
+					if (OnRandomGen != null)
+					{
+						foreach (OnRandomGenHandler handler in OnRandomGen.GetInvocationList().Cast<OnRandomGenHandler>())
+						{
+							HardmodeChance = handler(HardmodeChance, true);
+						}
+					}
+					var bio = RandomGen(HardmodeChance);
+					tasks = HardModeBiomes[bio](tasks);
+				}
 			}
 			return tasks;
 		}
@@ -293,6 +341,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				ilCursor.EmitLdloc(4);
 				ilCursor.EmitDelegate<Func<Point, Point>>((point2) =>
 				{
+					Console.WriteLine(0);
 					if (OneBiome.Shimmer ||  OneBiome.Biome == string.Empty)
 					{
 						while (Vector2D.Distance(new Vector2D(point2.X, point2.Y), GenVars.shimmerPosition) < (double)WorldGen.shimmerSafetyDistance)

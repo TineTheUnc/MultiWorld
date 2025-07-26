@@ -58,11 +58,13 @@ namespace MultiWorld.Common.Systems.WorldGens
 			}
 			int temple = tasks.FindIndex(genpass => genpass.Name.Equals("Temple"));
 			int jungle_temple = tasks.FindIndex(genpass => genpass.Name.Equals("Jungle Temple"));
-			
+			int lihzahrd_altars = tasks.FindIndex(genpass => genpass.Name.Equals("Lihzahrd Altars"));
+
 			if (OneBiome.HaveTemple)
 			{
 				tasks.Remove(tasks[temple]);
 				tasks.Remove(tasks[jungle_temple]);
+				tasks.Remove(tasks[lihzahrd_altars]);
 			}
 			else
 			{
@@ -71,9 +73,10 @@ namespace MultiWorld.Common.Systems.WorldGens
 				{
 					tasks.Remove(tasks[temple]);
 					tasks.Remove(tasks[jungle_temple]);
+					tasks.Remove(tasks[lihzahrd_altars]);
 				}
 				else {
-					OneBiome.HaveTemple = true;
+					OneBiome.HaveTempleGen = true;
 				}
 			}
 			return tasks;
@@ -115,6 +118,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				GenVars.mudWall = true;
 				for (int i = 0; i < Main.maxTilesX-1; i++)
 				{
+					progress.Set(0.45 + ((i/ Main.maxTilesX)*0.1));
 					var num1 = WorldGen.genRand.Next(1, 10);
 					for (int j = y - num1; j > 1; j--)
 					{
