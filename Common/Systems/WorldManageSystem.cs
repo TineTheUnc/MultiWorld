@@ -4,14 +4,13 @@ using MultiWorld.Common.Systems.WorldGens;
 using MultiWorld.Common.Types;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Terraria;
 using Terraria.Chat;
 using Terraria.GameContent;
 using Terraria.GameContent.Bestiary;
-using Terraria.GameContent.Biomes;
 using Terraria.GameContent.Events;
 using Terraria.GameContent.Generation;
 using Terraria.GameContent.UI.States;
@@ -22,8 +21,6 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.Social;
 using Terraria.WorldBuilding;
-using static Terraria.GameContent.Bestiary.IL_BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions;
-
 namespace MultiWorld.Common.Systems
 {
 	public class WorldManageSystem : ModSystem
@@ -39,36 +36,36 @@ namespace MultiWorld.Common.Systems
 		public int playerY = 0;
 		public bool CreateMultiWorld = false;
 		public int Radius = 0;
+		public bool load;
 		public Dictionary<int, dynamic> WorldUpdateEvent = [];
-
+		public delegate void OnMultiWorldLoadHandler(MetaData data);
+		public event OnMultiWorldLoadHandler OnMultiWorldLoad;
+		public delegate MetaData OnMultiWorldSaveHandler(MetaData data);
+		public event OnMultiWorldSaveHandler OnMultiWorldSave;
 		public override void Load()
 		{
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Final Cleanup"], OneBiome.ModifyFinalCleanup);
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Wall Variety"], OneBiome.ModifyWallVariety);
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Spreading Grass"], OneBiome.ModifySpreadingGrass);
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Grass Wall"], OneBiome.ModifyGrassWall);
-			base.Load();
-		}
-
-		public override void Unload()
-		{
-			base.Unload();
 		}
 
 		public override void LoadWorldData(TagCompound tag)
 		{
 			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path)) if (tag.ContainsKey("Biome")) OneBiome.Biome = tag.GetString("Biome");
-			base.LoadWorldData(tag);
 		}
 
 		public override void SaveWorldData(TagCompound tag)
 		{
 			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path)) tag["Biome"] = OneBiome.Biome;
-			base.SaveWorldData(tag);
-		}  
+		}
 
+		public override void PreSaveAndQuit()
+		{
+			MultiWorldSave();
+		}
 
-		public override void OnWorldUnload() 
+		public void MultiWorldSave()
 		{
 			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
 			{
@@ -228,19 +225,30 @@ namespace MultiWorld.Common.Systems
 				data.HaveDungeon = OneBiome.HaveDungeonGen;
 				data.HaveShimmer = OneBiome.HaveShimmerGen;
 				data.HaveTemple = OneBiome.HaveTempleGen;
+				if (OnMultiWorldSave != null)
+				{
+					foreach (OnMultiWorldSaveHandler handler in OnMultiWorldSave.GetInvocationList().Cast<OnMultiWorldSaveHandler>())
+					{
+						data = handler(data);
+					}
+				}
 				MultiWorldFileData.SaveMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"), data);
 			}
-			base.OnWorldUnload();
 		}
 
 		public override void OnWorldLoad()
 		{
-			base.OnWorldLoad();
+			load = true;
+		}
+
+		public void MultiWorldLoad()
+		{
 			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
 			{
 				var data = MultiWorldFileData.LoadMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"));
 				if (data.SaveFrom != Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path) && data.SaveFrom != null)
 				{
+					OnMultiWorldLoad?.Invoke(data);
 					NPC.downedBoss1 = data.NPC_downedBoss1;
 					NPC.downedBoss2 = data.NPC_downedBoss2;
 					NPC.downedBoss3 = data.NPC_downedBoss3;
@@ -408,6 +416,11 @@ namespace MultiWorld.Common.Systems
 		public override void PostUpdateWorld()
 		{
 			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path)) {
+				if (load)
+				{
+					MultiWorldLoad();
+					load = false;
+				}
 				if (WorldUpdateEvent.Keys.Count > 0)
 				{
 					if (WorldUpdateEvent.ContainsKey(1))
@@ -431,7 +444,6 @@ namespace MultiWorld.Common.Systems
 					}
 				}
 			}
-			base.PostUpdateWorld();
 		}
 
 		public override void ModifyWorldGenTasks(List<GenPass> tasks, ref double totalWeight)
@@ -442,7 +454,6 @@ namespace MultiWorld.Common.Systems
 				OneBiome.Reset();
 				tasks = OneBiome.GenWorld(tasks, ref totalWeight);
 			}
-			base.ModifyWorldGenTasks(tasks, ref totalWeight);
 		}
 
 		public override void ModifyHardmodeTasks(List<GenPass> tasks)
@@ -450,7 +461,6 @@ namespace MultiWorld.Common.Systems
 			if (OneBiome.Biome != string.Empty) {
 				OneBiome.GenHardMode(tasks);
 			}
-			base.ModifyHardmodeTasks(tasks);
 		}
 
 		public void ChangeWorld()
@@ -481,6 +491,7 @@ namespace MultiWorld.Common.Systems
 			{
 				do_worldGen = true;
 			}
+			MultiWorldSave();
 			WorldGen.SaveAndQuit(GenWolrd);
 		}
 

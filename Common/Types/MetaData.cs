@@ -1,10 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.Serialization;
 
 namespace MultiWorld.Common.Types
 {
@@ -267,6 +264,35 @@ namespace MultiWorld.Common.Types
 				}
 			}
 			return default;
+		}
+
+		public void GetExtensionData<T>(string key, ref T data)
+		{
+			if (string.IsNullOrEmpty(key))
+			{
+				throw new ArgumentException("Key cannot be null or empty.", nameof(key));
+			}
+			if (_extensionData.TryGetValue(key, out var value))
+			{
+				if (value is JObject jObject)
+					data = jObject.ToObject<T>();
+
+				if (value is JArray jArray)
+					data = jArray.ToObject<T>();
+
+				if (value is T tValue)
+					data = tValue;
+
+				try
+				{
+					data = (T)Convert.ChangeType(value, typeof(T));
+				}
+				catch
+				{
+					data = default;
+				}
+			}
+			data = default;
 		}
 	}
 }

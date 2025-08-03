@@ -7,6 +7,14 @@
 	<PropertyGroup>
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Reference Include="CalamityMod">
+	    <HintPath>..\..\ModReader\CalamityMod\CalamityMod.dll</HintPath>
+	  </Reference>
+	  <Reference Include="SubworldLibrary">
+	    <HintPath>..\..\Moddingasset\SubworldLibrary.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
 
 	<!-- References -->
 

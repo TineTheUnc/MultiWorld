@@ -1,21 +1,9 @@
-﻿using Microsoft.Xna.Framework;
-using MonoMod.Cil;
-using MonoMod.Core.Platforms;
-using MultiWorld.Common.Config;
-using System;
+﻿using MultiWorld.Common.Config;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
-using Terraria.GameContent.Biomes;
-using Terraria.GameContent.Generation;
-using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using static MultiWorld.Common.Systems.WorldManageSystem;
 
 namespace MultiWorld.Common.Systems.WorldGens
 {

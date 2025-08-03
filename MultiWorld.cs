@@ -26,14 +26,12 @@ namespace MultiWorld
 		{
 			LoadHook();
 			LoadIL();
-			base.Load();
 		}
 
 		public override void Unload()
 		{
 			UnloadHook();
 			UnloadIL();
-			base.Unload();
 		}
 
 		private static int WorldListSortMethod(WorldFileData data1, WorldFileData data2)

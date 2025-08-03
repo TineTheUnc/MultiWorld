@@ -1,13 +1,6 @@
-﻿using Humanizer;
-using MonoMod.Core.Platforms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Terraria;
 using Terraria.IO;
-using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
 namespace MultiWorld.Common.Systems.WorldGens

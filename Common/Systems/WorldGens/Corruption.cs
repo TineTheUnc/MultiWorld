@@ -1,14 +1,7 @@
-﻿using MonoMod.Core.Platforms;
-using Steamworks;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.IO;
-using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
 namespace MultiWorld.Common.Systems.WorldGens

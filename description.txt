@@ -72,9 +72,18 @@ v0.12
 - Bug fix.
 - Add hardmode gen for sepecial world.
 - Add config for sepecial hardmode generate in mod config.
-- Add Add modding support for sepecial hardmode generate.
+- Add modding support for sepecial hardmode generate.
 Add your hardmode generate to static Dictionary<string, HardmodeFunc> HardModeBiomes.
 And subscribe static event OnRandomGenHandler OnRandomGen for add your hardmode biome generate chance.
+
+v0.13
+- Bug fix.
+- Add calamity mod progression support.
+- Add modding support for save metadara.
+delegate void OnMultiWorldLoadHandler(MetaData data);
+event OnMultiWorldLoadHandler OnMultiWorldLoad;
+delegate MetaData OnMultiWorldSaveHandler(MetaData data);
+event OnMultiWorldSaveHandler OnMultiWorldSave;
 
 Not found any bug in testing but i can't test in every case. (be careful)
 

@@ -1,14 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
-using MonoMod.Core.Platforms;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameContent.Biomes;
 using Terraria.IO;
-using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
 namespace MultiWorld.Common.Systems.WorldGens

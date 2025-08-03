@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using MonoMod.Core.Platforms;
 using MultiWorld.Common.Config;
 using ReLogic.Utilities;
 using System;
@@ -8,7 +7,6 @@ using Terraria;
 using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
-using static MultiWorld.Common.Systems.WorldGens.Forest;
 
 namespace MultiWorld.Common.Systems.WorldGens
 {
