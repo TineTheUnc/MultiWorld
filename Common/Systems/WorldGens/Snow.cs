@@ -55,7 +55,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				{
 					double loadWeight = tasks[index].Weight;
 					totalWeight += loadWeight;
-					tasks.Remove(tasks[index]);
+					tasks[index].Disable();
 					if (item == "Buried Chests")
 					{
 						tasks.Insert(index, new OneBiome.BuriedChestPass(false, loadWeight));

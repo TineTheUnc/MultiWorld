@@ -18,7 +18,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				int index = tasks.FindIndex(genpass => genpass.Name.Equals(item));
 				if (index != -1)
 				{
-					tasks.Remove(tasks[index]);
+					tasks[index].Disable();
 				}
 			}
 			return tasks;

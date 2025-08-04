@@ -49,7 +49,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				if (index != -1)
 				{
 					double loadWeight = tasks[index].Weight;
-					tasks.Remove(tasks[index]);
+					tasks[index].Disable();
 					if (item == "Buried Chests")
 					{
 						tasks.Insert(index, new OneBiome.BuriedChestPass(false, loadWeight));
@@ -60,22 +60,22 @@ namespace MultiWorld.Common.Systems.WorldGens
 			if (i == "0")
 			{
 				int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
-				tasks.Remove(tasks[dungeon]);
+				tasks[dungeon].Disable();
 				int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
-				tasks.Remove(tasks[shimmer]);
+				tasks[shimmer].Disable();
 			}
 			else {
 				int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
 				var config = ModContent.GetInstance<Beta>();
 				if (OneBiome.HaveDungeon)
 				{
-					tasks.Remove(tasks[dungeon]);
+					tasks[dungeon].Disable();
 				}
 				else
 				{
 					if (!WorldGen.genRand.NextBool(config.DungeonChance, 10))
 					{
-						tasks.Remove(tasks[dungeon]);
+						tasks[dungeon].Disable();
 					}
 					else {
 						OneBiome.HaveDungeonGen = true;
@@ -84,13 +84,13 @@ namespace MultiWorld.Common.Systems.WorldGens
 				int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
 				if (OneBiome.HaveShimmer)
 				{
-					tasks.Remove(tasks[shimmer]);
+					tasks[shimmer].Disable();
 				}
 				else
 				{
 					if (!WorldGen.genRand.NextBool(config.ShimmerChance, 10))
 					{
-						tasks.Remove(tasks[shimmer]);
+						tasks[shimmer].Disable();
 					}
 					else {
 						OneBiome.HaveShimmerGen = true;

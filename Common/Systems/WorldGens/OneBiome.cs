@@ -80,9 +80,9 @@ namespace MultiWorld.Common.Systems.WorldGens
 			else
 			{
 				int i = tasks.FindIndex(genpass => genpass.Name.Equals("Spawn Point"));
-				tasks.Remove(tasks[i]);
+				tasks[i].Disable();
 				int j = tasks.FindIndex(genpass => genpass.Name.Equals("Guide"));
-				tasks.Remove(tasks[j]);
+				tasks[j].Disable();
 				Biome = string.Empty;
 				var config = ModContent.GetInstance<Beta>();
 				Dictionary<string, int> BiomesChance = new(){

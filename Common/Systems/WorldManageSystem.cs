@@ -1,4 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
+using MonoMod.Core.Platforms;
+using MonoMod.RuntimeDetour;
+using MonoMod.RuntimeDetour.HookGen;
 using MultiWorld.Common.Config;
 using MultiWorld.Common.Systems.WorldGens;
 using MultiWorld.Common.Types;
@@ -18,6 +22,7 @@ using Terraria.ID;
 using Terraria.IO;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Core;
 using Terraria.ModLoader.IO;
 using Terraria.Social;
 using Terraria.WorldBuilding;
@@ -42,6 +47,8 @@ namespace MultiWorld.Common.Systems
 		public event OnMultiWorldLoadHandler OnMultiWorldLoad;
 		public delegate MetaData OnMultiWorldSaveHandler(MetaData data);
 		public event OnMultiWorldSaveHandler OnMultiWorldSave;
+		public delegate void ModifyWorldGenTasks_orig(ModSystem system, List<GenPass> tasks, ref double totalWeight);
+		public delegate void ModifyWorldGenTasks_hook(ModifyWorldGenTasks_orig orin, ModSystem system, List<GenPass> tasks, ref double totalWeight);
 		public override void Load()
 		{
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Final Cleanup"], OneBiome.ModifyFinalCleanup);
@@ -49,6 +56,49 @@ namespace MultiWorld.Common.Systems
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Spreading Grass"], OneBiome.ModifySpreadingGrass);
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Grass Wall"], OneBiome.ModifyGrassWall);
 		}
+
+		public override void PostSetupContent()
+		{
+			var SystemsByModinfo = typeof(SystemLoader).GetField("SystemsByMod", BindingFlags.NonPublic | BindingFlags.Static);
+			Dictionary<Mod, List<ModSystem>> SystemsByMod = (Dictionary<Mod, List<ModSystem>>)SystemsByModinfo.GetValue(null);
+			var method = typeof(ModSystem).GetMethod(
+				"ModifyWorldGenTasks",
+				[typeof(List<GenPass>), typeof(double).MakeByRefType()]
+			);
+			List<Hook> SystemsHook = null;
+			foreach (var key in SystemsByMod.Keys) {
+				if (key is MultiWorld) continue;
+				foreach (var system in SystemsByMod[key]) {
+					if (HasOverride<ModSystem>(system, method)) {
+						SystemsHook.Add(new (system.GetType().GetMethod("ModifyWorldGenTasks", [typeof(List<GenPass>), typeof(double).MakeByRefType()]), OnModifyWorldGenTasks));
+					}
+				}
+			}
+			
+		}
+
+		public static void OnModifyWorldGenTasks(ModifyWorldGenTasks_orig orig, ModSystem system, List<GenPass> tasks, ref double totalWeight) 
+		{
+			Console.WriteLine("Ok-----");
+			Console.WriteLine(system.Mod.Name);
+			orig(system, tasks, ref totalWeight);
+		}
+
+		public static bool HasOverride<T>(T obj, MethodInfo method)
+		{
+			var actualMethod = obj.GetType().GetMethod(
+				method.Name,
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+				null,
+				method.GetParameters().Select(p => p.ParameterType).ToArray(),
+				null
+			);
+
+			return actualMethod != null &&
+				   actualMethod.DeclaringType == obj.GetType() &&
+				   actualMethod.GetBaseDefinition().DeclaringType != actualMethod.DeclaringType;
+		}
+
 
 		public override void LoadWorldData(TagCompound tag)
 		{
@@ -445,6 +495,8 @@ namespace MultiWorld.Common.Systems
 				}
 			}
 		}
+
+		
 
 		public override void ModifyWorldGenTasks(List<GenPass> tasks, ref double totalWeight)
 		{

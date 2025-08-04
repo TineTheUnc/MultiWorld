@@ -44,7 +44,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				if (index != -1)
 				{
 					double loadWeight = tasks[index].Weight;
-					tasks.Remove(tasks[index]);
+					tasks[index].Disable();
 					if (item == "Buried Chests")
 					{
 						tasks.Insert(index, new OneBiome.BuriedChestPass(false, loadWeight));
@@ -60,18 +60,18 @@ namespace MultiWorld.Common.Systems.WorldGens
 
 			if (OneBiome.HaveTemple)
 			{
-				tasks.Remove(tasks[temple]);
-				tasks.Remove(tasks[jungle_temple]);
-				tasks.Remove(tasks[lihzahrd_altars]);
+				tasks[temple].Disable();
+				tasks[jungle_temple].Disable();
+				tasks[lihzahrd_altars].Disable();
 			}
 			else
 			{
 				var config = ModContent.GetInstance<Beta>();
 				if (!WorldGen.genRand.NextBool(config.TempleChance, 10))
 				{
-					tasks.Remove(tasks[temple]);
-					tasks.Remove(tasks[jungle_temple]);
-					tasks.Remove(tasks[lihzahrd_altars]);
+					tasks[temple].Disable();
+					tasks[jungle_temple].Disable();
+					tasks[lihzahrd_altars].Disable();
 				}
 				else {
 					OneBiome.HaveTempleGen = true;

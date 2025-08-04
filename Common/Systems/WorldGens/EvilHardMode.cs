@@ -23,7 +23,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				if (index != -1)
 				{
 					double loadWeight = tasks[index].Weight;
-					tasks.Remove(tasks[index]);
+					tasks[index].Disable();
 					if (item == "Hardmode Evil")
 					{
 						tasks.Insert(index, new EvilPass(loadWeight));
