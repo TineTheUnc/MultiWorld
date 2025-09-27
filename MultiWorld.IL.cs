@@ -1,17 +1,19 @@
-﻿using MonoMod.Cil;
+﻿using Microsoft.Xna.Framework;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using MultiWorld.Common.Config;
 using MultiWorld.Common.Systems;
+using MultiWorld.Common.Systems.WorldGens;
 using MultiWorld.Common.Types;
 using System;
+using System.IO;
 using System.Reflection;
-using Mono.Cecil.Cil;
 using Terraria;
-using Terraria.ID;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameContent.UI.States;
+using Terraria.ID;
 using Terraria.IO;
 using Terraria.ModLoader;
-using System.IO;
-using Microsoft.Xna.Framework;
 
 namespace MultiWorld
 {
@@ -29,6 +31,7 @@ namespace MultiWorld
 			IL_UIWorldCreation.MakeBackAndCreatebuttons += IL_UIWorldCreation_MakeBackAndCreatebuttons;
 			IL_Player.ItemCheck_Inner += IL_Player_ItemCheck_Inner;
 			IL_WorldGen.SpreadGrass += IL_WorldGen_SpreadGrass;
+			IL_UIWorldCreation.FinishCreatingWorld += IL_FinishCreatingWorld;
 		}
 
 		private void UnloadIL()
@@ -44,6 +47,7 @@ namespace MultiWorld
 			IL_UIWorldCreation.MakeBackAndCreatebuttons -= IL_UIWorldCreation_MakeBackAndCreatebuttons;
 			IL_Player.ItemCheck_Inner -= IL_Player_ItemCheck_Inner;
 			IL_WorldGen.SpreadGrass -= IL_WorldGen_SpreadGrass;
+			IL_UIWorldCreation.FinishCreatingWorld -= IL_FinishCreatingWorld;
 
 		}
 
@@ -52,6 +56,60 @@ namespace MultiWorld
 			Logger.Debug("-- DebugIL --");
 			Logger.Debug(ilCursor.Body.Method.Name);
 			Logger.Debug(ilCursor.Body.Instructions[ilCursor.Index].OpCode.Code.ToString() + " " + ilCursor.Body.Instructions[ilCursor.Index].Operand.ToString());
+		}
+
+		private void IL_FinishCreatingWorld(ILContext il) {
+			try
+			{
+				var ilCursor = new ILCursor(il);
+				ilCursor.GotoNext(i => i.MatchLdnull());
+				ilCursor.EmitLdarg0();
+				ilCursor.EmitDelegate<Action<UIWorldCreation>>((self)=> {
+					var config = ModContent.GetInstance<Beta>();
+					var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+					var mod = ModContent.GetInstance<MultiWorld>();
+					OneBiome.Biome = string.Empty;
+					if (worldManageSystem.CreateMultiWorld)
+					{
+						var optionSeedInfo = self.GetType().GetField("_optionSeed", BindingFlags.Instance | BindingFlags.NonPublic);
+						var optionSeed = (string)optionSeedInfo.GetValue(self);
+						var ProcessSeedInfo = self.GetType().GetMethod("ProcessSeed", BindingFlags.Instance | BindingFlags.NonPublic);
+						object[] processedSeed = [null];
+						ProcessSeedInfo.Invoke(self, processedSeed);
+						var optionSizeInfo = self.GetType().GetField("_optionSize", BindingFlags.Instance | BindingFlags.NonPublic);
+						var optionSize = optionSizeInfo.GetValue(self);
+						var optionDifficultyInfo = self.GetType().GetField("_optionDifficulty", BindingFlags.Instance | BindingFlags.NonPublic);
+						var optionDifficulty = optionDifficultyInfo.GetValue(self);
+						var optionEvilInfo = self.GetType().GetField("_optionEvil", BindingFlags.Instance | BindingFlags.NonPublic);
+						var optionEvil = optionEvilInfo.GetValue(self);
+						var optionwWorldNameInfo = self.GetType().GetField("_optionwWorldName", BindingFlags.Instance | BindingFlags.NonPublic);
+						var optionwWorldName = (string)optionwWorldNameInfo.GetValue(self);
+						mod.MetaData = MultiWorldFileData.CreateMetaData();
+						mod.MetaData.optionSeed = optionSeed;
+						mod.MetaData.optionSize = (WorldSizeId)Enum.Parse(typeof(WorldSizeId), optionSize.ToString()); ;
+						mod.MetaData.optionDifficulty = (WorldDifficultyId)Enum.Parse(typeof(WorldDifficultyId), optionDifficulty.ToString()); ;
+						mod.MetaData.optionEvil = (WorldEvilId)Enum.Parse(typeof(WorldEvilId), optionEvil.ToString()); ;
+						mod.MetaData.optionwWorldName = optionwWorldName;
+						mod.MetaData.WorldRadius = MultiWorld.WorldRadius;
+						MultiWorld.WorldRadius = 0;
+						mod.MetaData.GenMode = config.GenMode;
+						if (config.GenMode == "Sepecial")
+						{
+							OneBiome.Biome = "Forest";
+						}
+						if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+						{
+							var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
+							MultiWorldFileData.SaveMeta(Path.Combine(directory, "meta.world"), mod.MetaData);
+						}
+					}
+				});
+			}
+			catch (Exception e)
+			{
+				MonoModHooks.DumpIL(ModContent.GetInstance<MultiWorld>(), il);
+				throw new ILPatchFailureException(ModContent.GetInstance<MultiWorld>(), il, e);
+			}
 		}
 
 		private void IL_WorldGen_SpreadGrass(ILContext il)
@@ -392,7 +450,11 @@ namespace MultiWorld
 				ilCursor.EmitCall(typeof(MultiWorldFileData).GetMethod("IsMultiWorld", BindingFlags.Public | BindingFlags.Static));
 				ilCursor.Emit(OpCodes.Brfalse, label1);
 				ilCursor.EmitLdloc(4);
-				ilCursor.EmitLdstr(" [Multi World] ");
+				ilCursor.EmitDelegate<Func<string>>(() =>
+				{
+					var config = ModContent.GetInstance<Beta>();
+					return $"[ {config.GenMode} ]" ;
+				});
 				ilCursor.EmitCall(typeof(string).GetMethod("Concat", [typeof(string), typeof(string)]));
 				ilCursor.EmitStloc(4);
 				ilCursor.GotoNext(i => i.MatchLdarg1());

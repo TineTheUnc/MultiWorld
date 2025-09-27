@@ -1,43 +1,115 @@
-﻿using MultiWorld.Common.Config;
+﻿using MonoMod.RuntimeDetour;
+using MultiWorld.Common.Config;
 using MultiWorld.Common.Systems;
 using MultiWorld.Common.Systems.WorldGens;
 using MultiWorld.Common.Types;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameContent.UI.States;
 using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.UI;
+using Terraria.WorldBuilding;
 
 namespace MultiWorld
 {
 	public partial class MultiWorld : Mod
 	{
+		private List<Hook> On_ModLoader = [];
+		private delegate Mod ModLoader_GetMod_orig(string name);
+		private delegate bool ModLoader_TryGetMod_orig(string name, out Mod mod);
+		private delegate bool ModLoader_HasMod_orig(string name);
+
 		private void LoadHook()
 		{
 			On_Main.GetWorldPathFromName += On_GetWorldPathFromName;
 			On_Main.LoadWorlds += On_LoadWorlds;
-			On_UIWorldCreation.FinishCreatingWorld += On_FinishCreatingWorld;
 			On_UIWorldListItem.DeleteButtonClick += On_DeleteButtonClick;
 			On_WorldFileData.OnWorldRenameSuccess += On_OnWorldRenameSuccess;
 			On_Player.ChangeSpawn += On_Player_ChangeSpawn;
 			On_Player.RemoveSpawn += On_Player_RemoveSpawn;
 			On_WorldGen.oceanDepths += On_WorldGen_oceanDepths;
+			On_WorldGen.CreateNewWorld += On_WorldGen_CreateNewWorld;
+			On_ModLoader.Add(new Hook(
+				typeof(ModLoader).GetMethod("GetMod", BindingFlags.Public | BindingFlags.Static),
+				On_ModLoader_GetMod
+			));
+			On_ModLoader.Add(new Hook(
+				typeof(ModLoader).GetMethod("TryGetMod", BindingFlags.Public | BindingFlags.Static),
+				On_ModLoader_TryGetMod
+			));
+			On_ModLoader.Add(new Hook(
+				typeof(ModLoader).GetMethod("HasMod", BindingFlags.Public | BindingFlags.Static),
+				On_ModLoader_HasMod
+			));
 		}
 
 		private void UnloadHook()
 		{
 			On_Main.GetWorldPathFromName -= On_GetWorldPathFromName;
 			On_Main.LoadWorlds -= On_LoadWorlds;
-			On_UIWorldCreation.FinishCreatingWorld -= On_FinishCreatingWorld;
 			On_UIWorldListItem.DeleteButtonClick -= On_DeleteButtonClick;
 			On_WorldFileData.OnWorldRenameSuccess -= On_OnWorldRenameSuccess;
 			On_Player.ChangeSpawn -= On_Player_ChangeSpawn;
 			On_Player.RemoveSpawn -= On_Player_RemoveSpawn;
 			On_WorldGen.oceanDepths -= On_WorldGen_oceanDepths;
+			On_WorldGen.CreateNewWorld -= On_WorldGen_CreateNewWorld;
+			foreach (var hook in On_ModLoader)hook.Dispose();
+			On_ModLoader.Clear();
+		}
+
+		private Mod On_ModLoader_GetMod(ModLoader_GetMod_orig orig, string name)
+		{
+			var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+			if (worldManageSystem.control_ModsByName != null)
+			{
+
+				return worldManageSystem.control_ModsByName[name];
+			}
+			return orig(name);
+		}
+
+		private bool On_ModLoader_TryGetMod(ModLoader_TryGetMod_orig orig, string name, out Mod mod)
+		{
+			var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+			if (worldManageSystem.control_ModsByName != null)
+			{
+
+				return worldManageSystem.control_ModsByName.TryGetValue(name, out mod);
+			}
+			return orig(name,out mod);
+		}
+
+		private bool On_ModLoader_HasMod(ModLoader_HasMod_orig orig, string name)
+		{
+			var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+			if (worldManageSystem.control_ModsByName != null)
+			{
+				return worldManageSystem.control_ModsByName.ContainsKey(name);
+			}
+			return orig(name);
+		}
+
+		private Task On_WorldGen_CreateNewWorld(On_WorldGen.orig_CreateNewWorld orig, GenerationProgress progress = null)
+		{
+			var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
+			var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
+			if (data != null)
+			{
+				if (data.GenMode == "Random Mod")
+				{
+					var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+					int index = WorldGen.genRand.Next(worldManageSystem.ModHookList.Count);
+					worldManageSystem.RandomMod = worldManageSystem.ModHookList.ToArray()[index];
+				}
+			}
+			return orig(progress);
 		}
 
 		private bool On_WorldGen_oceanDepths(On_WorldGen.orig_oceanDepths orig, int x, int y)
@@ -105,49 +177,6 @@ namespace MultiWorld
 				orig(self, evt, listeningElement);
 			}
 		}
-
-		private void On_FinishCreatingWorld(On_UIWorldCreation.orig_FinishCreatingWorld orig, UIWorldCreation self)
-		{
-			orig(self);
-			var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
-			OneBiome.Biome = string.Empty;
-			if (worldManageSystem.CreateMultiWorld)
-			{
-				var optionSeedInfo = self.GetType().GetField("_optionSeed", BindingFlags.Instance | BindingFlags.NonPublic);
-				var optionSeed = (string)optionSeedInfo.GetValue(self);
-				var ProcessSeedInfo = self.GetType().GetMethod("ProcessSeed", BindingFlags.Instance | BindingFlags.NonPublic);
-				object[] processedSeed = [null];
-				ProcessSeedInfo.Invoke(self, processedSeed);
-				var optionSizeInfo = self.GetType().GetField("_optionSize", BindingFlags.Instance | BindingFlags.NonPublic);
-				var optionSize = optionSizeInfo.GetValue(self);
-				var optionDifficultyInfo = self.GetType().GetField("_optionDifficulty", BindingFlags.Instance | BindingFlags.NonPublic);
-				var optionDifficulty = optionDifficultyInfo.GetValue(self);
-				var optionEvilInfo = self.GetType().GetField("_optionEvil", BindingFlags.Instance | BindingFlags.NonPublic);
-				var optionEvil = optionEvilInfo.GetValue(self);
-				var optionwWorldNameInfo = self.GetType().GetField("_optionwWorldName", BindingFlags.Instance | BindingFlags.NonPublic);
-				var optionwWorldName = (string)optionwWorldNameInfo.GetValue(self);
-				MetaData = MultiWorldFileData.CreateMetaData();
-				MetaData.optionSeed = optionSeed;
-				MetaData.optionSize = (WorldSizeId)Enum.Parse(typeof(WorldSizeId), optionSize.ToString()); ;
-				MetaData.optionDifficulty = (WorldDifficultyId)Enum.Parse(typeof(WorldDifficultyId), optionDifficulty.ToString()); ;
-				MetaData.optionEvil = (WorldEvilId)Enum.Parse(typeof(WorldEvilId), optionEvil.ToString()); ;
-				MetaData.optionwWorldName = optionwWorldName;
-				MetaData.WorldRadius = WorldRadius;
-				WorldRadius = 0;
-				var config = ModContent.GetInstance<Beta>();
-				if (config.SepecialWorld)
-				{
-					OneBiome.Biome = "Forest";
-				}
-				if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
-				{
-					var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
-					MultiWorldFileData.SaveMeta(Path.Combine(directory, "meta.world"), MetaData);
-				}
-			}
-
-		}
-
 
 		private string On_GetWorldPathFromName(On_Main.orig_GetWorldPathFromName orig, string worldName, bool cloudSave)
 		{

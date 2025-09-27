@@ -6,11 +6,13 @@ using MonoMod.RuntimeDetour.HookGen;
 using MultiWorld.Common.Config;
 using MultiWorld.Common.Systems.WorldGens;
 using MultiWorld.Common.Types;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
 using Terraria;
 using Terraria.Chat;
 using Terraria.GameContent;
@@ -26,6 +28,8 @@ using Terraria.ModLoader.Core;
 using Terraria.ModLoader.IO;
 using Terraria.Social;
 using Terraria.WorldBuilding;
+using tModPorter;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace MultiWorld.Common.Systems
 {
 	public class WorldManageSystem : ModSystem
@@ -42,19 +46,40 @@ namespace MultiWorld.Common.Systems
 		public bool CreateMultiWorld = false;
 		public int Radius = 0;
 		public bool load;
+		public HashSet<string> ModHookList = [];
+		private readonly List<Hook> SystemsHook = [];
+		private readonly List<Hook> BiomesHook = [];
+		public string RandomMod = "";
+		public List<string> LoadedMod = [];
+		public MetaData metaData;
 		public Dictionary<int, dynamic> WorldUpdateEvent = [];
 		public delegate void OnMultiWorldLoadHandler(MetaData data);
 		public event OnMultiWorldLoadHandler OnMultiWorldLoad;
 		public delegate MetaData OnMultiWorldSaveHandler(MetaData data);
 		public event OnMultiWorldSaveHandler OnMultiWorldSave;
-		public delegate void ModifyWorldGenTasks_orig(ModSystem system, List<GenPass> tasks, ref double totalWeight);
-		public delegate void ModifyWorldGenTasks_hook(ModifyWorldGenTasks_orig orin, ModSystem system, List<GenPass> tasks, ref double totalWeight);
+		private delegate void ModifyWorldGenTasks_orig(ModSystem system, List<GenPass> tasks, ref double totalWeight);
+		private delegate void ModifyHardmodeTasks_orig(ModSystem system, List<GenPass> tasks);
+		private delegate bool IsBiomeActive_orig(ModBiome biome, Player player);
+		public IDictionary<string, Mod> control_ModsByName = null;
+		public bool IsLeftSide => CurrentWorldIndex < 0;
+		public bool IsRightSide => CurrentWorldIndex > 0;
+		public bool IsCenter => CurrentWorldIndex == 0;
+
 		public override void Load()
 		{
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Final Cleanup"], OneBiome.ModifyFinalCleanup);
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Wall Variety"], OneBiome.ModifyWallVariety);
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Spreading Grass"], OneBiome.ModifySpreadingGrass);
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Grass Wall"], OneBiome.ModifyGrassWall);
+		}
+
+		public override void Unload()
+		{
+			ModHookList.Clear();
+			foreach (var hook in SystemsHook) hook.Dispose();
+			SystemsHook.Clear();
+			foreach (var hook in BiomesHook) hook.Dispose();
+			BiomesHook.Clear();
 		}
 
 		public override void PostSetupContent()
@@ -65,23 +90,159 @@ namespace MultiWorld.Common.Systems
 				"ModifyWorldGenTasks",
 				[typeof(List<GenPass>), typeof(double).MakeByRefType()]
 			);
-			List<Hook> SystemsHook = null;
 			foreach (var key in SystemsByMod.Keys) {
 				if (key is MultiWorld) continue;
 				foreach (var system in SystemsByMod[key]) {
 					if (HasOverride<ModSystem>(system, method)) {
-						SystemsHook.Add(new (system.GetType().GetMethod("ModifyWorldGenTasks", [typeof(List<GenPass>), typeof(double).MakeByRefType()]), OnModifyWorldGenTasks));
+						ModHookList.Add(key.Name);
+						SystemsHook.Add(new(system.GetType().GetMethod("ModifyWorldGenTasks", [typeof(List<GenPass>), typeof(double).MakeByRefType()]), OnModifyWorldGenTasks));
+						SystemsHook.Add(new(system.GetType().GetMethod("ModifyHardmodeTasks", [typeof(List<GenPass>)]), OnModifyHardmodeTasks));
 					}
 				}
 			}
-			
+
+			var ModBiomeListinfo = typeof(BiomeLoader).GetField("list", BindingFlags.NonPublic | BindingFlags.Instance);
+			List<ModBiome> ModBiomeList = (List<ModBiome>)ModBiomeListinfo.GetValue(LoaderManager.Get<BiomeLoader>());
+			foreach (var biome in ModBiomeList) {
+				ModHookList.Add(biome.Mod.Name);
+				BiomesHook.Add(new(biome.GetType().GetMethod("IsBiomeActive", [typeof(Player)]), OnIsBiomeActive));
+			}
+			File.WriteAllText(Path.Combine(MultiWorld.WorldSetting, "ModList.json"), JsonConvert.SerializeObject(ModHookList, Formatting.Indented));
 		}
 
-		public static void OnModifyWorldGenTasks(ModifyWorldGenTasks_orig orig, ModSystem system, List<GenPass> tasks, ref double totalWeight) 
+		private bool OnIsBiomeActive(IsBiomeActive_orig orig, ModBiome biome, Player player)
 		{
-			Console.WriteLine("Ok-----");
-			Console.WriteLine(system.Mod.Name);
-			orig(system, tasks, ref totalWeight);
+			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+			{
+				var worldsystem = ModContent.GetInstance<WorldManageSystem>();
+				if (worldsystem.metaData.GenMode == "Random Mod")
+				{
+					var ModName = biome.Mod.Name;
+					if (worldsystem.LoadedMod.Contains(ModName))
+					{
+						return orig(biome, player);
+					}
+					else
+					{
+						return false;
+					}
+				}
+				else
+				{
+					return orig(biome, player);
+				}
+			}
+			else
+			{
+				return orig(biome, player);
+			}
+		}
+
+		private void OnModifyHardmodeTasks(ModifyHardmodeTasks_orig orig, ModSystem system, List<GenPass> tasks)
+		{
+			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+			{
+				var worldsystem = ModContent.GetInstance<WorldManageSystem>();
+				if (worldsystem.metaData.GenMode == "Random Mod")
+				{
+					var ModName = system.Mod.Name;
+					if (worldsystem.LoadedMod.Contains(ModName))
+					{
+						orig(system, tasks);
+					}
+				}
+				else
+				{
+					orig(system, tasks);
+				}
+			}
+			else {
+				orig(system, tasks);
+			}
+		}
+
+		private void OnModifyWorldGenTasks(ModifyWorldGenTasks_orig orig, ModSystem system, List<GenPass> tasks, ref double totalWeight) 
+		{
+			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+			{
+				var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
+				var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
+				var worldsystem = ModContent.GetInstance<WorldManageSystem>();
+				if (data.GenMode == "Random Mod")
+				{
+					var ModName = system.Mod.Name;
+					var worldsetting = Path.Combine(MultiWorld.WorldSetting, Main.worldName.Trim().Replace(' ','_')+".json");
+					var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+					var modsByNameInfo = typeof(ModLoader).GetField("modsByName", BindingFlags.NonPublic | BindingFlags.Static);
+					var modsByName = (IDictionary<string, Mod>)modsByNameInfo.GetValue(null);
+					var orig_modsByName = (IDictionary<string, Mod>)new Dictionary<string, Mod>(modsByName);
+					if (File.Exists(worldsetting))
+					{
+						var text = File.ReadAllText(worldsetting);
+						var json = JsonConvert.DeserializeObject<ModSettingWorldData>(text);
+						var HaveIn = false;
+						if (json.Global.Contains(RandomMod))
+						{
+							var NewModList = worldManageSystem.ModHookList.Where(m => !json.Global.Contains(m)).ToList();
+							int index = WorldGen.genRand.Next(NewModList.Count);
+							RandomMod = NewModList[index];
+						}
+						foreach (var group in json.Group.Keys)
+						{
+							if (json.Group[group].Contains(worldManageSystem.RandomMod) && json.Group[group].Contains(ModName))
+							{
+								HaveIn = true;
+								break;
+							}
+						}
+						if (json.Global.Contains(ModName)  || HaveIn || ModName == worldManageSystem.RandomMod)
+						{
+							List<string> RemoveList = [];
+							foreach (var m in worldsystem.ModHookList) 
+							{
+								var hn = false;
+								foreach (var group in json.Group.Keys)
+								{
+									if (json.Group[group].Contains(worldManageSystem.RandomMod) && json.Group[group].Contains(m))
+									{
+										hn = true;
+										break;
+									}
+								}
+								if (!(json.Global.Contains(m) || hn || m == worldManageSystem.RandomMod)) {
+									RemoveList.Add(m);
+								}
+							}
+							var new_modsByName = (IDictionary<string, Mod>)modsByName.Where(m => !RemoveList.Contains(m.Key)).ToDictionary(m => m.Key, m => m.Value);
+							worldsystem.control_ModsByName = new_modsByName;
+							worldsystem.LoadedMod.Add(ModName);
+							MultiWorldFileData.SaveMeta(Path.Combine(directory, "meta.world"),data);
+							orig(system, tasks, ref totalWeight);
+							worldsystem.control_ModsByName = null;
+						}
+					}
+					else
+					{
+						if (ModName == worldManageSystem.RandomMod) {
+							var RemoveList = worldsystem.ModHookList;
+							RemoveList.Remove(worldManageSystem.RandomMod);
+							var new_modsByName = (IDictionary<string, Mod>)modsByName.Where(m => !RemoveList.Contains(m.Key)).ToDictionary(m => m.Key, m => m.Value);
+							worldsystem.control_ModsByName = new_modsByName;
+							worldsystem.LoadedMod.Add(ModName);
+							MultiWorldFileData.SaveMeta(Path.Combine(directory, "meta.world"), data);
+							orig(system, tasks, ref totalWeight);
+							worldsystem.control_ModsByName = null;
+						}
+					}
+				}
+				else
+				{
+					orig(system, tasks, ref totalWeight);
+				}
+			}
+			else {
+				orig(system, tasks, ref totalWeight);
+			}
 		}
 
 		public static bool HasOverride<T>(T obj, MethodInfo method)
@@ -102,12 +263,29 @@ namespace MultiWorld.Common.Systems
 
 		public override void LoadWorldData(TagCompound tag)
 		{
-			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path)) if (tag.ContainsKey("Biome")) OneBiome.Biome = tag.GetString("Biome");
+			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
+			{
+				if (tag.ContainsKey("Biome")) OneBiome.Biome = tag.GetString("Biome");
+				if (LoadedMod.Count == 0) {
+					if (tag.ContainsKey("LoadedMod")) LoadedMod = tag.Get<List<string>>("LoadedMod") ?? [];
+				}
+				var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
+				metaData = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
+			}
 		}
 
 		public override void SaveWorldData(TagCompound tag)
 		{
-			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path)) tag["Biome"] = OneBiome.Biome;
+			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path)) {
+				var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
+				var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
+				if (data.GenMode == "Sepecial")tag["Biome"] = OneBiome.Biome;
+				else if (data.GenMode == "Random Mod") tag["LoadedMod"] = LoadedMod;
+				OneBiome.Biome = string.Empty;
+				LoadedMod = [];
+				if (metaData != null)MultiWorldFileData.SaveMeta(Path.Combine(directory, "meta.world"), metaData);
+				metaData = null;
+			}
 		}
 
 		public override void PreSaveAndQuit()
@@ -521,7 +699,7 @@ namespace MultiWorld.Common.Systems
 			var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
 			var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
 			var config = ModContent.GetInstance<Beta>();
-			if (!config.SepecialWorld) {
+			if (config.GenMode != "Sepecial") {
 				Radius = data.WorldRadius;
 				if (Radius > 0)
 				{

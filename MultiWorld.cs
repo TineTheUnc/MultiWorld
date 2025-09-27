@@ -4,6 +4,7 @@ using MultiWorld.Common.Systems;
 using MultiWorld.Common.Types;
 using MultiWorld.Common.UI;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
@@ -21,9 +22,13 @@ namespace MultiWorld
 
 		private MetaData MetaData;
 		private static int WorldRadius = 0;
+		public static readonly string MainDir = Path.Combine(Main.SavePath, nameof(MultiWorld));
+		public static readonly string Asset = Path.Combine(MainDir, "Asset");
+		public static readonly string WorldSetting = Path.Combine(MainDir, "Setting");
 
 		public override void Load()
 		{
+			Directory.CreateDirectory(WorldSetting);
 			LoadHook();
 			LoadIL();
 		}
@@ -93,7 +98,7 @@ namespace MultiWorld
 			var multiworldRadius = new UINumberBox(0, 100, 0, Language.GetText("Mods.MultiWorld.UI.RadiusNumberBox").Value);
 			multiworldRadius.Top.Set(-11, 0f);
 			multiworldRadius.Left.Set(0, 0.32f);
-			if (!config.SepecialWorld)
+			if (config.GenMode != "Sepecial")
 			{
 				multiworldRadius.OnAdd += InputUpdateNumber;
 				multiworldRadius.OnReduce += InputUpdateNumber;
@@ -105,7 +110,7 @@ namespace MultiWorld
 				var config = ModContent.GetInstance<Beta>();
 				var UIWorldCreation_descriptionTextInfo = typeof(UIWorldCreation).GetField("_descriptionText", BindingFlags.Instance | BindingFlags.NonPublic);
 				var UIWorldCreation_descriptionText = (UIText)UIWorldCreation_descriptionTextInfo.GetValue(Main.MenuUI.CurrentState);
-				if (config.SepecialWorld)
+				if (config.GenMode == "Sepecial")
 				{
 					UIWorldCreation_descriptionText.SetText(Language.GetText("Mods.MultiWorld.UI.Description.SpecialWorldRadius"));
 				}

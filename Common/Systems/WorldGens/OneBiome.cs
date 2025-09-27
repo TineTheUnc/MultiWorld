@@ -334,7 +334,6 @@ namespace MultiWorld.Common.Systems.WorldGens
 				ilCursor.EmitLdloc(4);
 				ilCursor.EmitDelegate<Func<Point, Point>>((point2) =>
 				{
-					Console.WriteLine(0);
 					if (OneBiome.Shimmer ||  OneBiome.Biome == string.Empty)
 					{
 						while (Vector2D.Distance(new Vector2D(point2.X, point2.Y), GenVars.shimmerPosition) < (double)WorldGen.shimmerSafetyDistance)

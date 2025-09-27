@@ -19,15 +19,16 @@ Configs: {
 	Beta: {
 		DisplayName: Beta Features
 
-		SepecialWorld: {
-			Label: Sepecial World
-			Tooltip: Use sepecial world generate for create world.
+		GenMode: {
+			Label: World Generate Mode
+			Tooltip: Choose mode for world generate.
 		}
 
 		Headers: {
 			BiomeChance: Biome Chance
 			StructureChance: Structure Chance
 			HardModeChance: Hard Mode Chance
+			Action: Action Header
 		}
 
 		ForestChance: {
@@ -88,6 +89,20 @@ Configs: {
 		NoneGenChance: {
 			Label: NoneGen Chance
 			Tooltip: Chance for not gen hardmode
+		}
+
+		OpenWorldSettingButton: {
+			Label: Open World Setting Button
+			Tooltip: ""
+		}
+	}
+
+	OpenWorldSettingButton: {
+		Tooltip: ""
+
+		Button: {
+			Label: Button
+			Tooltip: ""
 		}
 	}
 }
