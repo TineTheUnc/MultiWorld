@@ -8,85 +8,21 @@ You can play normal world and can switch world create between normal world and m
 !!! This mod is beta version it can have some problem.
 !!! Don't use in multiplayer.
 
-V0.2
-- Can play normal world at enable this mod.
-- Spawn at left or right side of world after use World Mirror.
-- Fix world UI for multi world.
-- Fix generate world system for randomized.
+Move old update log to github wiki.
 
-V0.3
-- Fix world name bug.
-- Fix respawn system you will.
-if you die in multi world you will respawn at spawn point in world index 0.
-
-V0.4
-- Bug fix.
-- Respawn system.
-If you set respawn point in some world in multi wolrd you will respawn at spawn point in that world.
-- Fix MetaData file format.
-Please create new multi world for new MetaData file (Old version file not work).
-
-V0.5
-- Secret seeds support.
-- Fix player spawn point (Y axis).
-Use player position Y for find spawn point after teleport. 
-
-V0.6
-- Fix world create UI for multi world.
-- Add world radius Systems.
-You world is round. If go to end of world you will teleport to other side world (if radius is 1. you can't teleport to 2 but teleport to -1 after 1).
-
-V0.7
-- Fix Magic Mirror and Phone for work in multi world
-- Fix player spawn point calculate before use.
-
-V0.8
-- Sync world system
-Sync data between world and update world progress.
-I tried to sync every data but i don't know it is all.
-Tell me if you found problem or bug.
-Recommend create new world for good experience.
-
-V0.9
-- Bug fix.
-- New meta file format.
-- New world generate type (Beta).
-Can turn on in mod config.
-In this world generate type one map will hame only one biome and structures will random spawn.
-Not support hardmode.
-
-V0.10
-- Bug fix.
-- Add config for sepecial world generate in mod config.
-- Add modding support for sepecial world generate.
-In OneBiome class. 
-Add your world generate to static Dictionary<string, GenFunc> Biomes.
-And subscribe static event OnRandomGenHandler OnRandomGen for add your biome generate chance.
-
-V0.11
-- Add extension field in MetaData class for modding support.
-Use public void SetExtensionData(string key, object value) for set extension data.
-Use public T GetExtensionData<T>(string key) for get extension data.
-
-v0.12
-- Bug fix.
-- Add hardmode gen for sepecial world.
-- Add config for sepecial hardmode generate in mod config.
-- Add modding support for sepecial hardmode generate.
-Add your hardmode generate to static Dictionary<string, HardmodeFunc> HardModeBiomes.
-And subscribe static event OnRandomGenHandler OnRandomGen for add your hardmode biome generate chance.
-
-v0.13
-- Bug fix.
-- Add calamity mod progression support.
-- Add modding support for save metadara.
-delegate void OnMultiWorldLoadHandler(MetaData data);
-event OnMultiWorldLoadHandler OnMultiWorldLoad;
-delegate MetaData OnMultiWorldSaveHandler(MetaData data);
-event OnMultiWorldSaveHandler OnMultiWorldSave;
+V0.14
+- Change modconfig.
+Can select world type and button for open config world folder.
+- Change world list UI.
+Show world type behind world name.
+- Add new world type "Random Mod".
+This world type will random mod world gen in one map and can config for mod group.
 
 Not found any bug in testing but i can't test in every case. (be careful)
 
 You can support me with your money if you need : https://ko-fi.com/tine2548
 
+Update Log : https://github.com/TineTheUnc/MultiWorld/wiki/Update-log
+Wiki : https://github.com/TineTheUnc/MultiWorld/wiki
+Discord : https://discord.gg/qVPQ86jC4X
 Source Code : https://github.com/TineTheUnc/MultiWorld
