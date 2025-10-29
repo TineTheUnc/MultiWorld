@@ -115,6 +115,7 @@ namespace MultiWorld.Common.Systems
 			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
 			{
 				var worldsystem = ModContent.GetInstance<WorldManageSystem>();
+				if (worldsystem.metaData == null) return orig(biome, player);
 				if (worldsystem.metaData.GenMode == "Random Mod")
 				{
 					var ModName = biome.Mod.Name;
