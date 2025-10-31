@@ -105,8 +105,11 @@ namespace MultiWorld
 				if (data.GenMode == "Random Mod")
 				{
 					var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
-					int index = WorldGen.genRand.Next(worldManageSystem.ModHookList.Count);
-					worldManageSystem.RandomMod = worldManageSystem.ModHookList.ToArray()[index];
+					if (worldManageSystem.ModHookList.Count > 0)
+					{
+						int index = WorldGen.genRand.Next(worldManageSystem.ModHookList.Count);
+						worldManageSystem.RandomMod = worldManageSystem.ModHookList.ToArray()[index];
+					}
 				}
 			}
 			return orig(progress);
