@@ -4,9 +4,12 @@ using CalamityMod.Tiles.AstralSnow;
 using CalamityMod.Tiles.Ores;
 using CalamityMod.World;
 using CalamityMod.World.Planets;
+using Microsoft.Xna.Framework;
 using MultiWorld.Common.Types;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Terraria;
 using Terraria.ModLoader;
@@ -219,38 +222,39 @@ namespace MultiWorld.Common.Systems.ModSupport
 		}
 
 		public static void SwitchToDifficulty(DifficultyMode mode) {
-			if (mode == DifficultyModeSystem.GetCurrentDifficulty)
-			{
-				return;
-			}
-			var _difficultyTierInfo = typeof(DifficultyMode).GetField("_difficultyTier",BindingFlags.NonPublic | BindingFlags.Instance);
-			for (int i = 0; i < DifficultyModeSystem.Difficulties.Count; i++)
-			{
-				 
-				if ((int)_difficultyTierInfo.GetValue(DifficultyModeSystem.Difficulties[i])  >= (int)_difficultyTierInfo.GetValue(mode) && DifficultyModeSystem.Difficulties[i] != mode && DifficultyModeSystem.Difficulties[i].Enabled)
-				{
-					DifficultyModeSystem.Difficulties[i].Enabled = false;
-				}
-			}
-
-			for (int j = 0; j < (int)_difficultyTierInfo.GetValue(mode); j++)
-			{
-				if (DifficultyModeSystem.DifficultyTiers[j].Length == 1)
-				{
-					DifficultyModeSystem.DifficultyTiers[j][0].Enabled = true;
-					continue;
-				}
-
-				for (int k = 0; k < DifficultyModeSystem.DifficultyTiers[j].Length; k++)
-				{
-					DifficultyModeSystem.DifficultyTiers[j][k].Enabled = false;
-				}
-
-				DifficultyModeSystem.DifficultyTiers[j][mode.FavoredDifficultyAtTier(j)].Enabled = true;
-			}
-			mode.Enabled = true;
-			CalamityNetcode.SyncCalamityWorldDifficulties(Main.myPlayer);
-		}
+            if (mode == DifficultyModeSystem.GetCurrentDifficulty)
+            {
+                return;
+            }
+            CalamityUtils.BroadcastFormattedText("Mods.CalamityMod.UI.DifficultySwitch", Color.White, (Main.getGoodWorld && DifficultyModeSystem.GetCurrentDifficulty.FTWTextColor.HasValue) ? Utils.Hex3(DifficultyModeSystem.GetCurrentDifficulty.FTWTextColor.Value) : Utils.Hex3(DifficultyModeSystem.GetCurrentDifficulty.ChatTextColor), (Main.getGoodWorld && DifficultyModeSystem.GetCurrentDifficulty.FTWName != null) ? DifficultyModeSystem.GetCurrentDifficulty.FTWName : DifficultyModeSystem.GetCurrentDifficulty.Name, (Main.getGoodWorld && DifficultyModeSystem.GetCurrentDifficulty.FTWTextColor.HasValue) ? Utils.Hex3(mode.FTWTextColor.Value) : Utils.Hex3(mode.ChatTextColor), (Main.getGoodWorld && DifficultyModeSystem.GetCurrentDifficulty.FTWName != null) ? mode.FTWName : mode.Name);
+			FieldInfo _newGameModeIDInfo = typeof(DifficultyModeSystem).GetField("_newGameModeID", BindingFlags.NonPublic | BindingFlags.Static);
+			_newGameModeIDInfo.SetValue(null,mode.BackBoneGameModeID);
+			FieldInfo _difficultyTierInfo = typeof(DifficultyMode).GetField("_difficultyTier", BindingFlags.NonPublic | BindingFlags.Instance);
+            for (int i = 0; i < DifficultyModeSystem.Difficulties.Count; i++)
+            {
+                if ((int)_difficultyTierInfo.GetValue(DifficultyModeSystem.Difficulties[i]) >= (int)_difficultyTierInfo.GetValue(mode) && DifficultyModeSystem.Difficulties[i] != mode && DifficultyModeSystem.Difficulties[i].Enabled)
+                {
+                    DifficultyModeSystem.Difficulties[i].Enabled = false;
+                }
+            }
+            for (int j = 0; j < (int)_difficultyTierInfo.GetValue(mode); j++)
+            {
+                if (DifficultyModeSystem.DifficultyTiers[j].Length == 1)
+                {
+                    DifficultyModeSystem.DifficultyTiers[j][0].Enabled = true;
+                    continue;
+                }
+                for (int k = 0; k < DifficultyModeSystem.DifficultyTiers[j].Length; k++)
+                {
+                    DifficultyModeSystem.DifficultyTiers[j][k].Enabled = false;
+                }
+                for (int l = 0; l < mode.FavoredDifficultyAtTier(j).Length; l++)
+                {
+                    DifficultyModeSystem.DifficultyTiers[j][mode.FavoredDifficultyAtTier(j)[l]].Enabled = true;
+                }
+            }
+            mode.Enabled = true;
+        }
 
 		public override void PostUpdateWorld()
 		{
@@ -280,31 +284,45 @@ namespace MultiWorld.Common.Systems.ModSupport
 					}
 					if (WorldUpdateEvent.ContainsKey(2))
 					{
-						int num = ModContent.TileType<CryonicOre>();
-						double num2 = 0.00015;
-						float num3 = 0.45f;
-						float num4 = 0.7f;
-						int num5 = 3;
-						int num6 = 8;
-						int[] array = [147, 161, 163, 200, 164, 0, 0];
-						array[5] = ModContent.TileType<AstralSnow>();
-						array[6] = ModContent.TileType<AstralIce>();
-						CalamityUtils.SpawnOre(num, num2, num3, num4, num5, num6, array);
-						WorldUpdateEvent.Remove(2);
+                        int num = 7;
+                        List<int> list = new(num);
+                        CollectionsMarshal.SetCount(list, num);
+                        Span<int> span = CollectionsMarshal.AsSpan(list);
+                        int num2 = 0;
+                        span[num2] = 147;
+                        num2++;
+                        span[num2] = 161;
+                        num2++;
+                        span[num2] = 163;
+                        num2++;
+                        span[num2] = 200;
+                        num2++;
+                        span[num2] = 164;
+                        num2++;
+                        span[num2] = ModContent.TileType<AstralSnow>();
+                        num2++;
+                        span[num2] = ModContent.TileType<AstralIce>();
+                        List<int> tileTypes = list;
+                        if (Main.drunkWorld)
+                        {
+                            tileTypes.Add(60);
+                        }
+                        CalamityUtils.SpawnOre(ModContent.TileType<CryonicOre>(), 0.00016, 0.45f, 0.7f, 6, 11, tileTypes);
+                        WorldUpdateEvent.Remove(2);
 					}
 					if (WorldUpdateEvent.ContainsKey(3))
 					{
-						CalamityUtils.SpawnOre(ModContent.TileType<UelibloomOre>(), 0.00017, 0.55f, 0.9f, 8, 14, [59]);
-						WorldUpdateEvent.Remove(3);
+                        CalamityUtils.SpawnOre(ModContent.TileType<UelibloomOre>(), 0.00017, 0.55f, 0.9f, 8, 14, 59);
+                        WorldUpdateEvent.Remove(3);
 					}
 					if (WorldUpdateEvent.ContainsKey(4)) {
-						CalamityUtils.SpawnOre(ModContent.TileType<AuricOre>(), 2E-05, 0.75f, 0.9f, 10, 20, []);
-						WorldUpdateEvent.Remove(4);
+                        CalamityUtils.SpawnOre(ModContent.TileType<AuricOre>(), 2E-05, 0.75f, 0.9f, 10, 20);
+                        WorldUpdateEvent.Remove(4);
 					} 
 					if (WorldUpdateEvent.ContainsKey(5))
 					{
-						CalamityUtils.SpawnOre(ModContent.TileType<PerennialOre>(), 0.00012, 0.65f, 0.85f, 5, 10, [0, 1]);
-						WorldUpdateEvent.Remove(5);
+                        CalamityUtils.SpawnOre(ModContent.TileType<PerennialOre>(), 0.00012, 0.65f, 0.85f, 5, 10, 0, 1);
+                        WorldUpdateEvent.Remove(5);
 					}
 					if (WorldUpdateEvent.ContainsKey(6))
 					{
@@ -320,20 +338,20 @@ namespace MultiWorld.Common.Systems.ModSupport
 					}
 					if (WorldUpdateEvent.ContainsKey(7))
 					{
-						CalamityUtils.SpawnOre(108, 0.00012, 0.55f, 0.8f, 3, 8, []);
-						CalamityUtils.SpawnOre(222, 0.00012, 0.55f, 0.8f, 3, 8, []);
-						WorldUpdateEvent.Remove(7);
+                        CalamityUtils.SpawnOre(108, 0.00012, 0.55f, 0.8f, 3, 8);
+                        CalamityUtils.SpawnOre(222, 0.00012, 0.55f, 0.8f, 3, 8);
+                        WorldUpdateEvent.Remove(7);
 					}
 					if (WorldUpdateEvent.ContainsKey(8))
 					{
-						CalamityUtils.SpawnOre(111, 0.00012, 0.65f, 0.9f, 3, 8, []);
-						CalamityUtils.SpawnOre(223, 0.00012, 0.65f, 0.9f, 3, 8, []);
-						WorldUpdateEvent.Remove(8);
+                        CalamityUtils.SpawnOre(111, 0.00012, 0.65f, 0.9f, 3, 8);
+                        CalamityUtils.SpawnOre(223, 0.00012, 0.65f, 0.9f, 3, 8);
+                        WorldUpdateEvent.Remove(8);
 					}
 					if (WorldUpdateEvent.ContainsKey(9))
 					{
-						CalamityUtils.SpawnOre(ModContent.TileType<HallowedOre>(), 0.00017, 0.55f, 0.9f, 8, 14, [117, 402, 403, 164]);
-						WorldUpdateEvent.Remove(9);
+                        CalamityUtils.SpawnOre(ModContent.TileType<HallowedOre>(), 0.00017, 0.55f, 0.9f, 8, 14, 117, 402, 403, 164);
+                        WorldUpdateEvent.Remove(9);
 					}
 				}
 			}

@@ -28,7 +28,7 @@ Configs: {
 			BiomeChance: Biome Chance
 			StructureChance: Structure Chance
 			HardModeChance: Hard Mode Chance
-			Action: Action Header
+			Action: Action
 		}
 
 		ForestChance: {
@@ -57,7 +57,7 @@ Configs: {
 		}
 
 		EvilChance: {
-			Label: Eveil Chance
+			Label: Evil Chance
 			Tooltip: Evil biome spawn chance
 		}
 
@@ -77,13 +77,13 @@ Configs: {
 		}
 
 		EvilHardModeChance: {
-			Label: EvilHardMode Chance
-			Tooltip: Chance for gen evil in hardmode
+			Label: Evil Hard Mode Chance
+			Tooltip: Hard mode evil biome spawn chance
 		}
 
 		HallowHardModeChance: {
-			Label: HallowHardMode Chance
-			Tooltip: Chance for gen hallow in hardmode
+			Label: Hallow Hard Mode Chance
+			Tooltip: Hard mode hallow biome spawn chance
 		}
 
 		NoneGenChance: {

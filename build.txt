@@ -1,5 +1,5 @@
 displayName = MultiMap World(Beta)
 author = Tine
-version = 0.14.3
+version = 0.14.4
 side = both
 weakReferences = CalamityMod

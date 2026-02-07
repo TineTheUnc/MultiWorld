@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.ID;
 using Terraria.IO;
 using Terraria.WorldBuilding;
 
@@ -118,9 +119,9 @@ namespace MultiWorld.Common.Systems.WorldGens
 									int num800 = num799 + WorldGen.genRand.Next(10, 14);
 									for (int num801 = num799; num801 < num800; num801++)
 									{
-										if (Main.tile[num798, num801].TileType == 60 && num798 >= num794 + WorldGen.genRand.Next(5) && num798 < num795 - WorldGen.genRand.Next(5))
+										if (Main.tile[num798, num801].TileType == TileID.JungleGrass && num798 >= num794 + WorldGen.genRand.Next(5) && num798 < num795 - WorldGen.genRand.Next(5))
 										{
-											Main.tile[num798, num801].TileType = 662;
+											Main.tile[num798, num801].TileType = TileID.CrimsonJungleGrass;
 										}
 									}
 									break;
@@ -146,62 +147,62 @@ namespace MultiWorld.Common.Systems.WorldGens
 							{
 								if (Main.tile[num803, num804].HasTile)
 								{
-									if (Main.tile[num803, num804].TileType == 53 && num803 >= num794 + WorldGen.genRand.Next(5) && num803 <= num795 - WorldGen.genRand.Next(5))
+									if (Main.tile[num803, num804].TileType == TileID.Sand && num803 >= num794 + WorldGen.genRand.Next(5) && num803 <= num795 - WorldGen.genRand.Next(5))
 									{
-										Main.tile[num803, num804].TileType = 234;
+										Main.tile[num803, num804].TileType = TileID.Crimsand;
 									}
 									if ((double)num804 < Main.worldSurface - 1.0 && !flag51)
 									{
-										if (Main.tile[num803, num804].TileType == 0)
+										if (Main.tile[num803, num804].TileType == TileID.Dirt)
 										{
 											WorldGen.grassSpread = 0;
 											WorldGen.SpreadGrass(num803, num804, 0, 199, true, default);
 										}
-										else if (Main.tile[num803, num804].TileType == 59)
+										else if (Main.tile[num803, num804].TileType == TileID.Mud)
 										{
 											WorldGen.grassSpread = 0;
 											WorldGen.SpreadGrass(num803, num804, 59, 662, true, default);
 										}
 									}
 									flag51 = true;
-									if (Main.tile[num803, num804].WallType == 216)
+									if (Main.tile[num803, num804].WallType == WallID.HardenedSand)
 									{
-										Main.tile[num803, num804].WallType = 218;
+										Main.tile[num803, num804].WallType = WallID.CrimsonHardenedSand;
 									}
-									else if (Main.tile[num803, num804].WallType == 187)
+									else if (Main.tile[num803, num804].WallType == WallID.Sandstone)
 									{
-										Main.tile[num803, num804].WallType = 221;
+										Main.tile[num803, num804].WallType = WallID.CrimsonSandstone;
 									}
-									if (Main.tile[num803, num804].TileType == 1)
+									if (Main.tile[num803, num804].TileType == TileID.Stone)
 									{
 										if (num803 >= num794 + WorldGen.genRand.Next(5) && num803 <= num795 - WorldGen.genRand.Next(5))
 										{
-											Main.tile[num803, num804].TileType = 203;
+											Main.tile[num803, num804].TileType = TileID.Crimstone;
 										}
 									}
-									else if (Main.tile[num803, num804].TileType == 2)
+									else if (Main.tile[num803, num804].TileType == TileID.Grass)
 									{
-										Main.tile[num803, num804].TileType = 199;
+										Main.tile[num803, num804].TileType = TileID.CrimsonGrass;
 									}
-									else if (Main.tile[num803, num804].TileType == 60)
+									else if (Main.tile[num803, num804].TileType == TileID.JungleGrass)
 									{
-										Main.tile[num803, num804].TileType = 662;
+										Main.tile[num803, num804].TileType = TileID.CrimsonJungleGrass;
 									}
-									else if (Main.tile[num803, num804].TileType == 161)
+									else if (Main.tile[num803, num804].TileType == TileID.IceBlock)
 									{
-										Main.tile[num803, num804].TileType = 200;
+										Main.tile[num803, num804].TileType = TileID.FleshIce;
 									}
-									else if (Main.tile[num803, num804].TileType == 396)
+									else if (Main.tile[num803, num804].TileType == TileID.Sandstone)
 									{
-										Main.tile[num803, num804].TileType = 401;
+										Main.tile[num803, num804].TileType = TileID.CrimsonSandstone;
 									}
-									else if (Main.tile[num803, num804].TileType == 397)
+									else if (Main.tile[num803, num804].TileType == TileID.HardenedSand)
 									{
-										Main.tile[num803, num804].TileType = 399;
+										Main.tile[num803, num804].TileType = TileID.CrimsonHardenedSand;
 									}
-									else if (Main.tile[num803, num804].TileType == 398)
+									else if (Main.tile[num803, num804].TileType == TileID.CorruptHardenedSand)
 									{
-										Main.tile[num803, num804].TileType = 400;
+										Main.tile[num803, num804].TileType = TileID.CorruptSandstone;
 									}
 								}
 								num804++;
@@ -238,10 +239,10 @@ namespace MultiWorld.Common.Systems.WorldGens
 										num810--;
 									}
 								}
-								if ((num808 > 10 || (Main.tile[num809, num810 + 1].HasTile && Main.tile[num809, num810 + 1].TileType == 203)) && !WorldGen.IsTileNearby(num809, num810, 26, 3))
+								if ((num808 > 10 || (Main.tile[num809, num810 + 1].HasTile && Main.tile[num809, num810 + 1].TileType == TileID.Crimstone)) && !WorldGen.IsTileNearby(num809, num810, 26, 3))
 								{
 									WorldGen.Place3x2(num809, num810, 26, 1);
-									if (Main.tile[num809, num810].TileType == 26)
+									if (Main.tile[num809, num810].TileType == TileID.DemonAltar)
 									{
 										flag52 = true;
 									}
@@ -283,7 +284,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 								int num823 = (int)GenVars.worldSurfaceLow;
 								while ((double)num823 < Main.worldSurface - 1.0)
 								{
-									if (Main.tile[num822, num823].HasTile || Main.tile[num822, num823].WallType > 0)
+									if (Main.tile[num822, num823].HasTile || Main.tile[num822, num823].WallType > WallID.None)
 									{
 										if (num822 == num816)
 										{
@@ -315,9 +316,9 @@ namespace MultiWorld.Common.Systems.WorldGens
 									int num825 = num824 + WorldGen.genRand.Next(10, 14);
 									for (int num826 = num824; num826 < num825; num826++)
 									{
-										if (Main.tile[num822, num826].TileType == 60 && num822 >= num817 + WorldGen.genRand.Next(5) && num822 < Main.maxTilesX - WorldGen.genRand.Next(5))
+										if (Main.tile[num822, num826].TileType == TileID.JungleGrass && num822 >= num817 + WorldGen.genRand.Next(5) && num822 < Main.maxTilesX - WorldGen.genRand.Next(5))
 										{
-											Main.tile[num822, num826].TileType = 661;
+											Main.tile[num822, num826].TileType = TileID.CorruptJungleGrass;
 										}
 									}
 									break;
@@ -343,58 +344,58 @@ namespace MultiWorld.Common.Systems.WorldGens
 							{
 								if (Main.tile[num828, num829].HasTile)
 								{
-									if (Main.tile[num828, num829].TileType == 53 && num828 >= num817 + WorldGen.genRand.Next(5) && num828 <= Main.maxTilesX - WorldGen.genRand.Next(5))
+									if (Main.tile[num828, num829].TileType == TileID.Sand && num828 >= num817 + WorldGen.genRand.Next(5) && num828 <= Main.maxTilesX - WorldGen.genRand.Next(5))
 									{
-										Main.tile[num828, num829].TileType = 112;
+										Main.tile[num828, num829].TileType = TileID.Ebonsand;
 									}
 									if ((double)num829 < Main.worldSurface - 1.0 && !flag54)
 									{
-										if (Main.tile[num828, num829].TileType == 0)
+										if (Main.tile[num828, num829].TileType == TileID.Dirt)
 										{
 											WorldGen.grassSpread = 0;
 											WorldGen.SpreadGrass(num828, num829, 0, 23, true, default);
 										}
-										else if (Main.tile[num828, num829].TileType == 59)
+										else if (Main.tile[num828, num829].TileType == TileID.Mud)
 										{
 											WorldGen.grassSpread = 0;
 											WorldGen.SpreadGrass(num828, num829, 59, 661, true, default);
 										}
 									}
 									flag54 = true;
-									if (Main.tile[num828, num829].WallType == 216)
+									if (Main.tile[num828, num829].WallType == WallID.HardenedSand)
 									{
-										Main.tile[num828, num829].WallType = 217;
+										Main.tile[num828, num829].WallType = WallID.CorruptHardenedSand;
 									}
-									else if (Main.tile[num828, num829].WallType == 187)
+									else if (Main.tile[num828, num829].WallType == WallID.Sandstone)
 									{
-										Main.tile[num828, num829].WallType = 220;
+										Main.tile[num828, num829].WallType = WallID.CorruptSandstone;
 									}
-									if (Main.tile[num828, num829].TileType == 1)
+									if (Main.tile[num828, num829].TileType == TileID.Stone)
 									{
 										if (num828 >= num817 + WorldGen.genRand.Next(5) && num828 <= Main.maxTilesX - WorldGen.genRand.Next(5))
 										{
-											Main.tile[num828, num829].TileType = 25;
+											Main.tile[num828, num829].TileType = TileID.Ebonstone;
 										}
 									}
-									else if (Main.tile[num828, num829].TileType == 2)
+									else if (Main.tile[num828, num829].TileType == TileID.Grass)
 									{
-										Main.tile[num828, num829].TileType = 23;
+										Main.tile[num828, num829].TileType = TileID.CorruptGrass;
 									}
-									else if (Main.tile[num828, num829].TileType == 60)
+									else if (Main.tile[num828, num829].TileType == TileID.JungleGrass)
 									{
-										Main.tile[num828, num829].TileType = 661;
+										Main.tile[num828, num829].TileType = TileID.CorruptJungleGrass;
 									}
-									else if (Main.tile[num828, num829].TileType == 161)
+									else if (Main.tile[num828, num829].TileType == TileID.IceBlock)
 									{
-										Main.tile[num828, num829].TileType = 163;
+										Main.tile[num828, num829].TileType = TileID.CorruptIce;
 									}
-									else if (Main.tile[num828, num829].TileType == 396)
+									else if (Main.tile[num828, num829].TileType == TileID.Sandstone)
 									{
-										Main.tile[num828, num829].TileType = 400;
+										Main.tile[num828, num829].TileType = TileID.CorruptSandstone;
 									}
-									else if (Main.tile[num828, num829].TileType == 397)
+									else if (Main.tile[num828, num829].TileType == TileID.HardenedSand)
 									{
-										Main.tile[num828, num829].TileType = 398;
+										Main.tile[num828, num829].TileType = TileID.CorruptHardenedSand;
 									}
 								}
 								num829++;
@@ -404,7 +405,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 						{
 							for (int num831 = 0; num831 < Main.maxTilesY - 50; num831++)
 							{
-								if (Main.tile[num830, num831].HasTile && Main.tile[num830, num831].TileType == 31)
+								if (Main.tile[num830, num831].HasTile && Main.tile[num830, num831].TileType == TileID.ShadowOrbs)
 								{
 									int num837 = num830 - 13;
 									int num832 = num830 + 13;
@@ -416,16 +417,16 @@ namespace MultiWorld.Common.Systems.WorldGens
 										{
 											for (int num836 = num833; num836 < num834; num836++)
 											{
-												if (Math.Abs(num835 - num830) + Math.Abs(num836 - num831) < 9 + WorldGen.genRand.Next(11) && !WorldGen.genRand.NextBool(3)&& Main.tile[num835, num836].TileType != 31)
+												if (Math.Abs(num835 - num830) + Math.Abs(num836 - num831) < 9 + WorldGen.genRand.Next(11) && !WorldGen.genRand.NextBool(3)&& Main.tile[num835, num836].TileType != TileID.ShadowOrbs)
 												{
 													Main.tile[num835, num836].Get<TileWallWireStateData>().HasTile = true;
-													Main.tile[num835, num836].TileType = 25;
+													Main.tile[num835, num836].TileType = TileID.Ebonstone;
 													if (Math.Abs(num835 - num830) <= 1 && Math.Abs(num836 - num831) <= 1)
 													{
 														Main.tile[num835, num836].Get<TileWallWireStateData>().HasTile = false;
 													}
 												}
-												if (Main.tile[num835, num836].TileType != 31 && Math.Abs(num835 - num830) <= 2 + WorldGen.genRand.Next(3) && Math.Abs(num836 - num831) <= 2 + WorldGen.genRand.Next(3))
+												if (Main.tile[num835, num836].TileType != TileID.ShadowOrbs && Math.Abs(num835 - num830) <= 2 + WorldGen.genRand.Next(3) && Math.Abs(num836 - num831) <= 2 + WorldGen.genRand.Next(3))
 												{
 													Main.tile[num835, num836].Get<TileWallWireStateData>().HasTile  = false;
 												}

@@ -453,7 +453,7 @@ namespace MultiWorld
 				ilCursor.EmitDelegate<Func<string>>(() =>
 				{
 					var config = ModContent.GetInstance<Beta>();
-					return $"[ {config.GenMode} ]" ;
+					return $" [ {config.GenMode} ]" ;
 				});
 				ilCursor.EmitCall(typeof(string).GetMethod("Concat", [typeof(string), typeof(string)]));
 				ilCursor.EmitStloc(4);

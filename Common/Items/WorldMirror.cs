@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 using MultiWorld.Common.Systems;
 using MultiWorld.Common.Types;
 
-namespace MultiWorld.Common.Item
+namespace MultiWorld.Common.Items
 {
 	public class WorldMirror: ModItem
 	{
