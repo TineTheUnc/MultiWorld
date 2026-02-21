@@ -16,10 +16,6 @@ namespace MultiWorld.Common.Config
 	{
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 
-		[OptionStrings(["Normal", "Sepecial", "Random Mod"])]
-		[DefaultValue("Normal")]
-		public string GenMode { get; set; }
-
 		[Header("BiomeChance")]
 		[DefaultValue(1)]
 		[Range(1, 10)]

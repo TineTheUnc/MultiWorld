@@ -1,5 +1,5 @@
 ﻿using Terraria.GameContent.UI.Elements;
-namespace MultiWorld.Common.UI
+namespace MultiWorld.Common.UI.Elements
 {
 	public class UINumberBox(int min, int max, int start,string message) : UITextPanel<string>(message + start.ToString())
 	{

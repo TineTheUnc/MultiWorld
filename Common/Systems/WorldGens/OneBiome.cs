@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using Terraria;
 using Terraria.GameContent.Biomes;
+using Terraria.ID;
 using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
@@ -100,8 +101,8 @@ namespace MultiWorld.Common.Systems.WorldGens
 						BiomesChance = handler(BiomesChance);
 					}
 				}
-				var bio = RandomGen(BiomesChance);
-				tasks = WorldBiomes[bio](tasks, ref totalWeight);
+				Biome = RandomGen(BiomesChance);
+				tasks = WorldBiomes[Biome](tasks, ref totalWeight);
 			}
 			return tasks;
 		}
@@ -392,7 +393,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 						int num307 = 10;
 						while ((double)num307 < Main.worldSurface - 1.0)
 						{
-							if (Main.tile[num306, num307].HasTile && Main.tile[num306, num307].TileType == 0)
+							if (Main.tile[num306, num307].HasTile && Main.tile[num306, num307].TileType == TileID.Dirt)
 							{
 								bool flag9 = false;
 								bool flag10 = false;
@@ -400,12 +401,12 @@ namespace MultiWorld.Common.Systems.WorldGens
 								{
 									for (int num309 = num307 - 1; num309 <= num307 + 1; num309++)
 									{
-										if (Main.tile[num308, num309].WallType == 81)
+										if (Main.tile[num308, num309].WallType == WallID.CrimsonGrassUnsafe)
 										{
 											flag9 = true;
 											break;
 										}
-										else if (Main.tile[num308, num309].WallType == 69)
+										else if (Main.tile[num308, num309].WallType == WallID.CorruptGrassUnsafe)
 										{
 											flag10 = true;
 											break;

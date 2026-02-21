@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
+using Terraria.ID;
 using Terraria.IO;
 using Terraria.Localization;
 using Terraria.WorldBuilding;
@@ -99,7 +100,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 							num1078 += WorldGen.genRand.Next(5);
 							for (int num1079 = num1077; num1079 < num1077 + num1078; num1079++)
 							{
-								Main.tile[num1076, num1079].TileType = 53;
+								Main.tile[num1076, num1079].TileType = TileID.Sand;
 							}
 
 							break;
@@ -157,7 +158,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 									if (num741 > num738)
 									{
 										Main.tile[num739, num741].LiquidAmount = byte.MaxValue;
-										if (Main.tile[num739, num741].LiquidType == 1)
+										if (Main.tile[num739, num741].LiquidType == LiquidID.Lava)
 										{
 											Main.tile[num739, num741].Get<LiquidData>().LiquidType = 0;
 										}
@@ -170,11 +171,11 @@ namespace MultiWorld.Common.Systems.WorldGens
 								}
 								else if (num741 > num738)
 								{
-									Main.tile[num739, num741].TileType = 53;
+									Main.tile[num739, num741].TileType = TileID.Sand;
 									Main.tile[num739, num741].Get<TileWallWireStateData>().HasTile = true;
 								}
 
-								Main.tile[num739, num741].WallType = 0;
+								Main.tile[num739, num741].WallType = WallID.None;
 							}
 						}
 					}
@@ -204,7 +205,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 									if (num748 > num745)
 									{
 										Main.tile[num746, num748].LiquidAmount = byte.MaxValue;
-										if (Main.tile[num746, num748].LiquidType == 1)
+										if (Main.tile[num746, num748].LiquidType == LiquidID.Lava)
 										{
 											Main.tile[num746, num748].Get<LiquidData>().LiquidType = 0;
 										}
@@ -217,11 +218,11 @@ namespace MultiWorld.Common.Systems.WorldGens
 								}
 								else if (num748 > num745)
 								{
-									Main.tile[num746, num748].TileType = 53;
+									Main.tile[num746, num748].TileType = TileID.Sand;
 									Main.tile[num746, num748].Get<TileWallWireStateData>().HasTile = true;
 								}
 
-								Main.tile[num746, num748].WallType = 0;
+								Main.tile[num746, num748].WallType = WallID.None;
 							}
 						}
 					}

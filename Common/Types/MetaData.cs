@@ -35,7 +35,7 @@ namespace MultiWorld.Common.Types
 		public WorldDifficultyId optionDifficulty;
 		public WorldEvilId optionEvil;
 		public string optionwWorldName = string.Empty;
-		public string GenMode = "Normal";
+		public GenMode GenMode;
 		public Dictionary<long, int> spawnPoint = new() {
 			{ 0,0 }
 		};
@@ -295,5 +295,17 @@ namespace MultiWorld.Common.Types
 			}
 			data = default;
 		}
-	}
+
+		public string GetModeName()
+		{
+			return GenMode switch
+			{
+				GenMode.Off => "",
+                GenMode.Normal => "Normal",
+                GenMode.Sepecial => "Sepecial",
+                GenMode.RandomMod => "Random Mod",
+				_ => "Unknown"
+			};
+        }
+    }
 }

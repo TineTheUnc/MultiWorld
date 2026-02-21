@@ -43,7 +43,6 @@ namespace MultiWorld.Common.Systems
 		public bool do_recall = false;
 		public bool do_phone = false;
 		public int playerY = 0;
-		public bool CreateMultiWorld = false;
 		public int Radius = 0;
 		public bool load;
 		public HashSet<string> ModHookList = [];
@@ -65,7 +64,10 @@ namespace MultiWorld.Common.Systems
 		public bool IsRightSide => CurrentWorldIndex > 0;
 		public bool IsCenter => CurrentWorldIndex == 0;
 
-		public override void Load()
+		public GenMode genMode = GenMode.Off;
+        public int WorldRadius = 0;
+
+        public override void Load()
 		{
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Final Cleanup"], OneBiome.ModifyFinalCleanup);
 			WorldGen.ModifyPass((PassLegacy)WorldGen.VanillaGenPasses["Wall Variety"], OneBiome.ModifyWallVariety);
@@ -116,7 +118,7 @@ namespace MultiWorld.Common.Systems
 			{
 				var worldsystem = ModContent.GetInstance<WorldManageSystem>();
 				if (worldsystem.metaData == null) return orig(biome, player);
-				if (worldsystem.metaData.GenMode == "Random Mod")
+				if (worldsystem.metaData.GenMode == GenMode.RandomMod)
 				{
 					var ModName = biome.Mod.Name;
 					if (worldsystem.LoadedMod.Contains(ModName))
@@ -144,7 +146,7 @@ namespace MultiWorld.Common.Systems
 			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
 			{
 				var worldsystem = ModContent.GetInstance<WorldManageSystem>();
-				if (worldsystem.metaData.GenMode == "Random Mod")
+				if (worldsystem.metaData.GenMode == GenMode.RandomMod)
 				{
 					var ModName = system.Mod.Name;
 					if (worldsystem.LoadedMod.Contains(ModName))
@@ -169,7 +171,7 @@ namespace MultiWorld.Common.Systems
 				var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
 				var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
 				var worldsystem = ModContent.GetInstance<WorldManageSystem>();
-				if (data.GenMode == "Random Mod")
+				if (data.GenMode == GenMode.RandomMod)
 				{
 					var ModName = system.Mod.Name;
 					var worldsetting = Path.Combine(MultiWorld.WorldSetting, Main.worldName.Trim().Replace(' ','_')+".json");
@@ -280,8 +282,8 @@ namespace MultiWorld.Common.Systems
 			if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path)) {
 				var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
 				var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
-				if (data.GenMode == "Sepecial")tag["Biome"] = OneBiome.Biome;
-				else if (data.GenMode == "Random Mod") tag["LoadedMod"] = LoadedMod;
+				if (data.GenMode == GenMode.Sepecial) tag["Biome"] = OneBiome.Biome;
+				else if (data.GenMode == GenMode.RandomMod) tag["LoadedMod"] = LoadedMod;
 				OneBiome.Biome = string.Empty;
 				LoadedMod = [];
 				if (metaData != null)MultiWorldFileData.SaveMeta(Path.Combine(directory, "meta.world"), metaData);
@@ -679,8 +681,9 @@ namespace MultiWorld.Common.Systems
 
 		public override void ModifyWorldGenTasks(List<GenPass> tasks, ref double totalWeight)
 		{
-			
-			if (OneBiome.Biome != string.Empty)
+            var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
+            var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
+            if (data.GenMode == GenMode.Sepecial)
 			{
 				OneBiome.Reset();
 				tasks = OneBiome.GenWorld(tasks, ref totalWeight);
@@ -689,7 +692,10 @@ namespace MultiWorld.Common.Systems
 
 		public override void ModifyHardmodeTasks(List<GenPass> tasks)
 		{
-			if (OneBiome.Biome != string.Empty) {
+            var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
+            var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
+            if (data.GenMode == GenMode.Sepecial)
+            {
 				OneBiome.GenHardMode(tasks);
 			}
 		}
@@ -700,7 +706,7 @@ namespace MultiWorld.Common.Systems
 			var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);
 			var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
 			var config = ModContent.GetInstance<Beta>();
-			if (config.GenMode != "Sepecial") {
+			if (genMode != GenMode.Sepecial) {
 				Radius = data.WorldRadius;
 				if (Radius > 0)
 				{

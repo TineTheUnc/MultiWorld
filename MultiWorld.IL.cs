@@ -69,7 +69,7 @@ namespace MultiWorld
 					var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
 					var mod = ModContent.GetInstance<MultiWorld>();
 					OneBiome.Biome = string.Empty;
-					if (worldManageSystem.CreateMultiWorld)
+					if (worldManageSystem.genMode > 0)
 					{
 						var optionSeedInfo = self.GetType().GetField("_optionSeed", BindingFlags.Instance | BindingFlags.NonPublic);
 						var optionSeed = (string)optionSeedInfo.GetValue(self);
@@ -90,10 +90,10 @@ namespace MultiWorld
 						mod.MetaData.optionDifficulty = (WorldDifficultyId)Enum.Parse(typeof(WorldDifficultyId), optionDifficulty.ToString()); ;
 						mod.MetaData.optionEvil = (WorldEvilId)Enum.Parse(typeof(WorldEvilId), optionEvil.ToString()); ;
 						mod.MetaData.optionwWorldName = optionwWorldName;
-						mod.MetaData.WorldRadius = MultiWorld.WorldRadius;
-						MultiWorld.WorldRadius = 0;
-						mod.MetaData.GenMode = config.GenMode;
-						if (config.GenMode == "Sepecial")
+						mod.MetaData.WorldRadius = worldManageSystem.WorldRadius;
+                        worldManageSystem.WorldRadius = 0;
+						mod.MetaData.GenMode = worldManageSystem.genMode;
+						if (worldManageSystem.genMode == GenMode.Sepecial)
 						{
 							OneBiome.Biome = "Forest";
 						}
@@ -450,10 +450,14 @@ namespace MultiWorld
 				ilCursor.EmitCall(typeof(MultiWorldFileData).GetMethod("IsMultiWorld", BindingFlags.Public | BindingFlags.Static));
 				ilCursor.Emit(OpCodes.Brfalse, label1);
 				ilCursor.EmitLdloc(4);
-				ilCursor.EmitDelegate<Func<string>>(() =>
+                ilCursor.EmitLdarg0();
+                ilCursor.EmitLdfld(typeof(AWorldListItem).GetField("_data", BindingFlags.Instance | BindingFlags.NonPublic));
+                ilCursor.EmitCallvirt(typeof(FileData).GetMethod("get_Path", BindingFlags.Instance | BindingFlags.Public));
+                ilCursor.EmitDelegate<Func<string,string>>((path) =>
 				{
-					var config = ModContent.GetInstance<Beta>();
-					return $" [ {config.GenMode} ]" ;
+                    var data = MultiWorldFileData.LoadMeta(Path.Combine(Path.GetDirectoryName(path), "meta.world"));
+                    var config = ModContent.GetInstance<Beta>();
+					return $" [ {data.GetModeName()} ]" ;
 				});
 				ilCursor.EmitCall(typeof(string).GetMethod("Concat", [typeof(string), typeof(string)]));
 				ilCursor.EmitStloc(4);

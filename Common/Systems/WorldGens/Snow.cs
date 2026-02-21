@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Terraria;
+using Terraria.ID;
 using Terraria.IO;
 using Terraria.WorldBuilding;
 
@@ -86,7 +87,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 				{
 					int num199 = (!WorldGen.remixWorldGen) ? WorldGen.genRand.Next((int)(Main.worldSurface + Main.rockLayer) / 2, GenVars.lavaLine) : WorldGen.genRand.Next((int)Main.worldSurface, Main.maxTilesY - 300);
 					int num200 = WorldGen.genRand.Next(GenVars.snowMinX[num199], GenVars.snowMaxX[num199]);
-					if (Main.tile[num200, num199].HasTile && (Main.tile[num200, num199].TileType == 147 || Main.tile[num200, num199].TileType == 161 || Main.tile[num200, num199].TileType == 162 || Main.tile[num200, num199].TileType == 224))
+					if (Main.tile[num200, num199].HasTile && (Main.tile[num200, num199].TileType == TileID.SnowBlock || Main.tile[num200, num199].TileType == TileID.IceBlock || Main.tile[num200, num199].TileType == TileID.BreakableIce || Main.tile[num200, num199].TileType == TileID.Slush))
 					{
 						int num203 = WorldGen.genRand.Next(1, 4);
 						int num204 = WorldGen.genRand.Next(1, 4);
@@ -122,7 +123,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 							{
 								if (num755 == 123)
 								{
-									Main.tile[num751, num750].TileType = 224;
+									Main.tile[num751, num750].TileType = TileID.Slush;
 								}
 							}
 							else
@@ -133,7 +134,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 								{
 									for (int num754 = num750 - num752; num754 <= num750 + num752; num754++)
 									{
-										if (Main.tile[num753, num754].TileType == 60 || Main.tile[num753, num754].TileType == 70 || Main.tile[num753, num754].TileType == 71 || Main.tile[num753, num754].TileType == 72)
+										if (Main.tile[num753, num754].TileType == TileID.JungleGrass || Main.tile[num753, num754].TileType == TileID.MushroomGrass || Main.tile[num753, num754].TileType == TileID.MushroomPlants || Main.tile[num753, num754].TileType == TileID.MushroomTrees)
 										{
 											flag46 = false;
 											break;
@@ -142,13 +143,13 @@ namespace MultiWorld.Common.Systems.WorldGens
 								}
 								if (flag46)
 								{
-									Main.tile[num751, num750].TileType = 224;
+									Main.tile[num751, num750].TileType = TileID.Slush;
 								}
 							}
 						}
 						else
 						{
-							Main.tile[num751, num750].TileType = 161;
+							Main.tile[num751, num750].TileType = TileID.IceBlock;
 						}
 					}
 				}
@@ -180,9 +181,9 @@ namespace MultiWorld.Common.Systems.WorldGens
 					{
 						if (num980 < num975)
 						{
-							if (Main.tile[num981, num980].WallType == 2)
+							if (Main.tile[num981, num980].WallType == WallID.DirtUnsafe)
 							{
-								Main.tile[num981, num980].WallType = 40;
+								Main.tile[num981, num980].WallType = WallID.SnowWallUnsafe;
 							}
 							ushort num983 = Main.tile[num981, num980].TileType;
 							if (num983 <= 23)
@@ -193,7 +194,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 									case 2:
 										break;
 									case 1:
-										Main.tile[num981, num980].TileType = 161;
+										Main.tile[num981, num980].TileType = TileID.IceBlock;
 										goto IL_33F;
 									default:
 										if (num983 != 23)
@@ -207,7 +208,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 							{
 								goto IL_33F;
 							}
-							Main.tile[num981, num980].TileType = 147;
+							Main.tile[num981, num980].TileType = TileID.SnowBlock;
 						}
 						else
 						{
@@ -231,9 +232,9 @@ namespace MultiWorld.Common.Systems.WorldGens
 							int num982 = num980;
 							while (num982 < num980 + num979)
 							{
-								if (Main.tile[num981, num982].WallType == 2)
+								if (Main.tile[num981, num982].WallType == WallID.DirtUnsafe)
 								{
-									Main.tile[num981, num982].WallType = 40;
+									Main.tile[num981, num982].WallType = WallID.SnowWallUnsafe;
 								}
 								ushort num983 = Main.tile[num981, num982].TileType;
 								if (num983 <= 23)
@@ -244,7 +245,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 										case 2:
 											goto IL_2F1;
 										case 1:
-											Main.tile[num981, num982].TileType = 161;
+											Main.tile[num981, num982].TileType = TileID.IceBlock;
 											break;
 										default:
 											if (num983 == 23)
@@ -262,7 +263,7 @@ namespace MultiWorld.Common.Systems.WorldGens
 								num982++;
 								continue;
 							IL_2F1:
-								Main.tile[num981, num982].TileType = 147;
+								Main.tile[num981, num982].TileType = TileID.SnowBlock;
 								goto IL_32D;
 							}
 						}

@@ -2,7 +2,9 @@ using Microsoft.Xna.Framework;
 using MultiWorld.Common.Config;
 using MultiWorld.Common.Systems;
 using MultiWorld.Common.Types;
-using MultiWorld.Common.UI;
+using MultiWorld.Common.UI.Elements;
+using MultiWorld.Common.UI.State;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -13,15 +15,14 @@ using Terraria.ID;
 using Terraria.IO;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.UI;
 using Terraria.UI;
 
 namespace MultiWorld
 {
 	public partial class MultiWorld : Mod
 	{
-
-		private MetaData MetaData;
-		private static int WorldRadius = 0;
+        private MetaData MetaData;
 		public static readonly string MainDir = Path.Combine(Main.SavePath, nameof(MultiWorld));
 		public static readonly string Asset = Path.Combine(MainDir, "Asset");
 		public static readonly string WorldSetting = Path.Combine(MainDir, "Setting");
@@ -54,101 +55,47 @@ namespace MultiWorld
 		}
 		private static void AddMultiWorldMenu(UIElement Container, float accumualtedHeight)
 		{
-			Container.Parent.Parent.Height = StyleDimension.FromPixels((float)(338 + 18));
-			var multiworldCreate = new UIPanel()
+            WorldManageSystem worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+			worldManageSystem.genMode = 0;
+            Container.Parent.Parent.Height = StyleDimension.FromPixels((float)(338 + 18));
+			var multiworldButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MultiWorld.UI.MultiWorldButton"))
 			{
-				Width = StyleDimension.FromPixelsAndPercent((0f) * 2f, 1f),
-				Height = StyleDimension.FromPixelsAndPercent(42f, 0f),
-			};
-			multiworldCreate.Top.Set(accumualtedHeight, 0f);
-			var multiworldButton = new UITextPanel<string>("Multi World: off")
-			{
-				Width = StyleDimension.FromPixelsAndPercent(0f, 0.1f),
-			};
-			var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
-			worldManageSystem.CreateMultiWorld = false;
-			multiworldButton.Top.Set(-11, 0f);
-			multiworldButton.Left.Set(0, -0.025f);
+				Width = StyleDimension.FromPixelsAndPercent(0f, 3f),
+			}.WithFadedMouseOver(); ;
+			multiworldButton.Top.Set(accumualtedHeight, 0f);
 			multiworldButton.OnLeftClick += (UIMouseEvent _, UIElement listeningElement) => {
-				var Button = (UITextPanel<string>)listeningElement;
-				var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
-				if (worldManageSystem.CreateMultiWorld)
-				{
-					worldManageSystem.CreateMultiWorld = false;
-					Button.SetText("Multi World: off");
-				}
-				else
-				{
-					worldManageSystem.CreateMultiWorld = true;
-					Button.SetText("Multi World: on");
-				}
-			};
-			multiworldButton.OnMouseOver += ButtonOver;
-			multiworldButton.OnMouseOut += ButtonOut;
+
+				Main.MenuUI.SetState(new UIWorldCreate());
+                Main.menuMode = 888;
+            };
 			multiworldButton.OnMouseOver += (UIMouseEvent _, UIElement listeningElement) =>
 			{
 				var UIWorldCreation_descriptionTextInfo = typeof(UIWorldCreation).GetField("_descriptionText", BindingFlags.Instance | BindingFlags.NonPublic);
 				var UIWorldCreation_descriptionText = (UIText)UIWorldCreation_descriptionTextInfo.GetValue(Main.MenuUI.CurrentState);
-				UIWorldCreation_descriptionText.SetText(Language.GetText("Mods.MultiWorld.UI.Description.MultiWorldToggle"));
+				UIWorldCreation_descriptionText.SetText(Language.GetText("Mods.MultiWorld.UI.Description.MultiWorldButton"));
 			};
 			multiworldButton.OnMouseOut += ClearOptionDescription;
-			multiworldCreate.Append(multiworldButton);
-			WorldRadius = 0;
-			var config = ModContent.GetInstance<Beta>();
-			var multiworldRadius = new UINumberBox(0, 100, 0, Language.GetText("Mods.MultiWorld.UI.RadiusNumberBox").Value);
-			multiworldRadius.Top.Set(-11, 0f);
-			multiworldRadius.Left.Set(0, 0.32f);
-			if (config.GenMode != "Sepecial")
+			multiworldButton.OnUpdate += MultiworldButtonOnUpdate;
+            Container.Append(multiworldButton);
+		}
+
+		private static void MultiworldButtonOnUpdate(UIElement listeningElement)
+		{
+            WorldManageSystem worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+			var multiworldButton = listeningElement as UITextPanel<LocalizedText>;
+			if (worldManageSystem.genMode>0) multiworldButton.BackgroundColor = Color.DarkGreen;
+
+        }
+
+        private static void ClearOptionDescription(UIMouseEvent evt, UIElement listeningElement)
+		{
+			if (Main.MenuUI.CurrentState is UIWorldCreation)
 			{
-				multiworldRadius.OnAdd += InputUpdateNumber;
-				multiworldRadius.OnReduce += InputUpdateNumber;
-				multiworldRadius.OnMouseOver += ButtonOver;
-				multiworldRadius.OnMouseOut += ButtonOut;
-			}
-			multiworldRadius.OnMouseOver += (UIMouseEvent _, UIElement listeningElement) =>
-			{
-				var config = ModContent.GetInstance<Beta>();
 				var UIWorldCreation_descriptionTextInfo = typeof(UIWorldCreation).GetField("_descriptionText", BindingFlags.Instance | BindingFlags.NonPublic);
 				var UIWorldCreation_descriptionText = (UIText)UIWorldCreation_descriptionTextInfo.GetValue(Main.MenuUI.CurrentState);
-				if (config.GenMode == "Sepecial")
-				{
-					UIWorldCreation_descriptionText.SetText(Language.GetText("Mods.MultiWorld.UI.Description.SpecialWorldRadius"));
-				}
-				else
-				{
-					UIWorldCreation_descriptionText.SetText(Language.GetText("Mods.MultiWorld.UI.Description.MultiWorldRadius"));
-				}
-
-			};
-			multiworldRadius.OnMouseOut += ClearOptionDescription;
-			multiworldCreate.Append(multiworldRadius);
-			Container.Append(multiworldCreate);
+				UIWorldCreation_descriptionText.SetText(Language.GetText("UI.WorldDescriptionDefault"));
+			}
 		}
-
-		private static void ClearOptionDescription(UIMouseEvent evt, UIElement listeningElement)
-		{
-			var UIWorldCreation_descriptionTextInfo = typeof(UIWorldCreation).GetField("_descriptionText", BindingFlags.Instance | BindingFlags.NonPublic);
-			var UIWorldCreation_descriptionText = (UIText)UIWorldCreation_descriptionTextInfo.GetValue(Main.MenuUI.CurrentState);
-			UIWorldCreation_descriptionText.SetText(Language.GetText("UI.WorldDescriptionDefault"));
-		}
-
-		private static void InputUpdateNumber(UINumberBox self)
-		{
-			WorldRadius = self.Number;
-		}
-
-		private static void ButtonOver(UIMouseEvent _, UIElement listeningElement)
-		{
-			var Button = (UITextPanel<string>)listeningElement;
-			Button.BorderColor = Colors.RarityYellow;
-		}
-
-		private static void ButtonOut(UIMouseEvent _, UIElement listeningElement)
-		{
-			var Button = (UITextPanel<string>)listeningElement;
-			Button.BorderColor = Color.Black;
-		}
-
 		public static bool CanSpawn(int x, int y)
 		{
 			List<bool> X = [];

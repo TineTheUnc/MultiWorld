@@ -18,6 +18,11 @@ Show world type behind world name.
 - Add new world type "Random Mod".
 This world type will random mod world gen in one map and can config for mod group.
 
+V0.15
+- Add new UI in world creation page for select world type.
+- Bug fix for special world type.
+This is not full update. wait for full UI update in 0.15.1.
+
 Not found any bug in testing but i can't test in every case. (be careful)
 
 You can support me with your money if you need : https://ko-fi.com/tine2548

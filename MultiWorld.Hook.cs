@@ -11,7 +11,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
-using Terraria.GameContent.UI.States;
 using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -102,7 +101,7 @@ namespace MultiWorld
 			var data = MultiWorldFileData.LoadMeta(Path.Combine(directory, "meta.world"));
 			if (data != null)
 			{
-				if (data.GenMode == "Random Mod")
+				if (data.GenMode == GenMode.RandomMod)
 				{
 					var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
 					if (worldManageSystem.ModHookList.Count > 0)
@@ -184,7 +183,7 @@ namespace MultiWorld
 		private string On_GetWorldPathFromName(On_Main.orig_GetWorldPathFromName orig, string worldName, bool cloudSave)
 		{
 			var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
-			if (worldManageSystem.CreateMultiWorld)
+			if (worldManageSystem.genMode > 0)
 			{
 				return orig(worldName, cloudSave).Replace(".wld", ".world" + Path.DirectorySeparatorChar + "0" + ".wld");
 			}
