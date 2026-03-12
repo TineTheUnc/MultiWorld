@@ -1,5 +1,4 @@
-﻿using MultiWorld.Common.Config;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Terraria;
 using Terraria.ModLoader;
@@ -7,98 +6,103 @@ using Terraria.WorldBuilding;
 
 namespace MultiWorld.Common.Systems.WorldGens
 {
-	public class Forest
-	{
-		public static List<string> removeList = [
-			"Dunes",
-			"Ocean Sand",
-			"Generate Ice Biome",
-			"Jungle",
-			"Mud Caves To Grass",
-			"Full Desert",
-			"Corruption",
-			"Beaches",
-			"Create Ocean Caves",
-			"Pyramids",
-			"Wet Jungle",
-			"Jungle Temple",
-			"Hives",
-			"Jungle Chests",
-			"Oasis",
-			"Shell Piles",
-			"Ice",
-			"Jungle Chests Placement",
-			"Temple",
-			"Jungle Trees",
-			"Glowing Mushrooms and Jungle Plants",
-			"Jungle Plants",
-			"Gems In Ice Biome",
-			"Muds Walls In Jungle",
-			"Larva",
-			"Lihzahrd Altars",
-			"Buried Chests",
-		];
+    public class Forest
+    {
+        public static List<string> removeList = [
+            "Dunes",
+            "Ocean Sand",
+            "Generate Ice Biome",
+            "Jungle",
+            "Mud Caves To Grass",
+            "Full Desert",
+            "Corruption",
+            "Beaches",
+            "Create Ocean Caves",
+            "Pyramids",
+            "Wet Jungle",
+            "Jungle Temple",
+            "Hives",
+            "Jungle Chests",
+            "Oasis",
+            "Shell Piles",
+            "Ice",
+            "Jungle Chests Placement",
+            "Temple",
+            "Jungle Trees",
+            "Glowing Mushrooms and Jungle Plants",
+            "Jungle Plants",
+            "Gems In Ice Biome",
+            "Muds Walls In Jungle",
+            "Larva",
+            "Lihzahrd Altars",
+            "Buried Chests",
+        ];
 
-		public static List<GenPass> Gens(List<GenPass> tasks, ref double totalWeight) {
-			OneBiome.Shimmer = false;
-			OneBiome.Evil = 0;
-			OneBiome.Biome = "Forest";
-			foreach (string item in removeList)
-			{
-				int index = tasks.FindIndex(genpass => genpass.Name.Equals(item));
-				if (index != -1)
-				{
-					double loadWeight = tasks[index].Weight;
-					tasks[index].Disable();
-					if (item == "Buried Chests")
-					{
-						tasks.Insert(index, new OneBiome.BuriedChestPass(false, loadWeight));
-					}
-				}
-			}
-			var i = Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path);
-			if (i == "0")
-			{
-				int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
-				tasks[dungeon].Disable();
-				int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
-				tasks[shimmer].Disable();
-			}
-			else {
-				int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
-				var config = ModContent.GetInstance<Beta>();
-				if (OneBiome.HaveDungeon)
-				{
-					tasks[dungeon].Disable();
-				}
-				else
-				{
-					if (!WorldGen.genRand.NextBool(config.DungeonChance, 10))
-					{
-						tasks[dungeon].Disable();
-					}
-					else {
-						OneBiome.HaveDungeonGen = true;
-					}
-				}
-				int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
-				if (OneBiome.HaveShimmer)
-				{
-					tasks[shimmer].Disable();
-				}
-				else
-				{
-					if (!WorldGen.genRand.NextBool(config.ShimmerChance, 10))
-					{
-						tasks[shimmer].Disable();
-					}
-					else {
-						OneBiome.HaveShimmerGen = true;
-					}
-				}
-			}
-			return tasks;
-		}
-		
-	}
+        public static List<GenPass> Gens(List<GenPass> tasks, ref double totalWeight)
+        {
+            OneBiome.Shimmer = false;
+            OneBiome.Evil = 0;
+            OneBiome.Biome = "Forest";
+            foreach (string item in removeList)
+            {
+                int index = tasks.FindIndex(genpass => genpass.Name.Equals(item));
+                if (index != -1)
+                {
+                    double loadWeight = tasks[index].Weight;
+                    tasks[index].Disable();
+                    if (item == "Buried Chests")
+                    {
+                        tasks.Insert(index, new OneBiome.BuriedChestPass(false, loadWeight));
+                    }
+                }
+            }
+            var i = Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path);
+            if (i == "0")
+            {
+                int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
+                tasks[dungeon].Disable();
+                int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
+                tasks[shimmer].Disable();
+            }
+            else
+            {
+                int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
+                var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+                if (OneBiome.HaveDungeon)
+                {
+                    tasks[dungeon].Disable();
+                }
+                else
+                {
+                    if (!WorldGen.genRand.NextBool(worldManageSystem.StructureChance["Dungeon"], 10))
+                    {
+                        tasks[dungeon].Disable();
+                    }
+                    else
+                    {
+                        OneBiome.HaveDungeonGen = true;
+                    }
+                }
+                int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
+                if (OneBiome.HaveShimmer)
+                {
+                    tasks[shimmer].Disable();
+                }
+                else
+                {
+
+                    if (!WorldGen.genRand.NextBool(worldManageSystem.StructureChance["Shimmer"], 10))
+                    {
+                        tasks[shimmer].Disable();
+                    }
+                    else
+                    {
+                        OneBiome.HaveShimmerGen = true;
+                    }
+                }
+            }
+            return tasks;
+        }
+
+    }
 }

@@ -1,39 +1,34 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using MultiWorld.Common.Config;
-using MultiWorld.Common.Systems;
+﻿using MultiWorld.Common.Systems;
 using MultiWorld.Common.Types;
 using MultiWorld.Common.UI.Elements;
-using ReLogic.Content;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
-using Terraria.GameContent.UI.States;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.UI;
-using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
-using tModPorter;
 
-namespace MultiWorld.Common.UI.State
+namespace MultiWorld.Common.UI.States
 {
-    public class UIWorldCreate: UIState
+    public class UIWorldCreate : UIState
     {
         UIAutoScaleTextTextPanel<LocalizedText> backbutton;
         UINumberBox multiworldRadius;
         UITextPanel<string> waitUpdate;
+        UIList specialPanel;
+        UIScrollbar scrollbar;
         public override void OnInitialize()
         {
             WorldManageSystem worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
-            //var accumualtedHeight = 0;
-            multiworldRadius = new UINumberBox(0, 100, 0, Language.GetText("Mods.MultiWorld.UI.RadiusNumberBox").Value)
+            UIPanel panel = new();
+            panel.Width.Set(500, 0);
+            panel.Height.Set(450, 0);
+            panel.HAlign = 0.5f;
+            panel.VAlign = 0.45f;
+            multiworldRadius = new UINumberBox(0, 100, worldManageSystem.Radius, Language.GetText("Mods.MultiWorld.UI.RadiusNumberBox").Value)
             {
                 Width = new StyleDimension(-10, 1),
                 Height = { Pixels = 40 },
@@ -48,22 +43,58 @@ namespace MultiWorld.Common.UI.State
                 Height = { Pixels = 40 },
                 Top = { Pixels = 60 }
             }.WithFadedMouseOver();
-            UIPanel panel = new();
-            panel.Width.Set(500, 0);
-            panel.Height.Set(450, 0);
-            panel.HAlign = 0.5f;
-            panel.VAlign = 0.45f;
-            if (worldManageSystem.genMode == GenMode.Normal)
+            specialPanel = new()
             {
-                panel.Append(multiworldRadius);
-            }
-            else if (worldManageSystem.genMode != GenMode.Off)
+                Width = new StyleDimension(-20, 1),
+                Top = { Pixels = 60 },
+                Height = { Pixels = 360 },
+                Left = { Pixels = 5 },
+                ListPadding = 5f
+            };
+            scrollbar = new();
+            scrollbar.Height.Set(-70, 1f);
+            scrollbar.Top.Set(70, 0);
+            scrollbar.Left.Set(-20, 1f);
+            scrollbar.SetView(360f, 1000f);
+            specialPanel.SetScrollbar(scrollbar);
+            UINumberSliderPanel biomeSlider = new(Language.GetText("Mods.MultiWorld.UI.Special.Headers.Biome").Value,
+                [
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Forest").Value, 1,10,1,worldManageSystem.BiomesChance["Forest"],OnValueChanged: SetBiomeChance("Forest")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Desert").Value, 1,10,1,worldManageSystem.BiomesChance["Desert"],OnValueChanged: SetBiomeChance("Desert")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Jungle").Value, 1,10,1,worldManageSystem.BiomesChance["Jungle"],OnValueChanged: SetBiomeChance("Jungle")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Snow").Value, 1,10,1,worldManageSystem.BiomesChance["Snow"], OnValueChanged : SetBiomeChance("Snow")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Ocean").Value, 1,10,1,worldManageSystem.BiomesChance["Ocean"], OnValueChanged : SetBiomeChance("Ocean")),
+                ]
+            )
             {
-                panel.Append(waitUpdate);
-            }
+                Width = new StyleDimension(-20, 1),
+            };
+            specialPanel.Add(biomeSlider);
+            UINumberSliderPanel structureSlider = new(Language.GetText("Mods.MultiWorld.UI.Special.Headers.Structure").Value,
+                [
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Structure.Dungeon").Value, 1,10,1,worldManageSystem.StructureChance["Dungeon"], OnValueChanged : SetStructureChance("Dungeon")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Structure.Temple").Value, 1,10,1,worldManageSystem.StructureChance["Temple"], OnValueChanged : SetStructureChance("Temple")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Structure.Shimmer").Value, 1,10,1,worldManageSystem.StructureChance["Shimmer"], OnValueChanged : SetStructureChance("Shimmer"))
+                ]
+            )
+            {
+                Width = new StyleDimension(-20, 1),
+            };
+            specialPanel.Add(structureSlider);
+            UINumberSliderPanel hardModeSlider = new(Language.GetText("Mods.MultiWorld.UI.Special.Headers.HardMode").Value,
+                [
+                new(Language.GetText("Mods.MultiWorld.UI.Special.HardMode.Evil").Value, 1,10,1,worldManageSystem.HardmodeChance["Evil"], OnValueChanged : SetHardModeChance("Evil")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.HardMode.Hallow").Value, 1,10,1,worldManageSystem.HardmodeChance["Hallow"], OnValueChanged : SetHardModeChance("Hallow")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.HardMode.NoneGen").Value, 1,10,1,worldManageSystem.HardmodeChance["NoneGen"], OnValueChanged : SetHardModeChance("NoneGen"))
+                ]
+            )
+            {
+                Width = new StyleDimension(-20, 1),
+            };
+            specialPanel.Add(hardModeSlider);
             var worldtypebutton = new UIAutoScaleTextTextPanel<LocalizedText>(Language.GetText($"Mods.MultiWorld.UI.WorldtypeButton.{worldManageSystem.genMode}"))
             {
-                Width = new StyleDimension(-10,1),
+                Width = new StyleDimension(-10, 1),
                 Height = { Pixels = 40 },
                 HAlign = 0.5f,
                 Top = { Pixels = 10 }
@@ -81,12 +112,64 @@ namespace MultiWorld.Common.UI.State
             backbutton.OnLeftClick += Backbutton_OnClick;
             Append(panel);
             Append(backbutton);
+            Addchildren(panel);
         }
 
-        private static void InputUpdateNumber(UINumberBox self)
+        private static Action<int> SetBiomeChance(string biome)
+        {
+            return (x) =>
+            {
+                WorldManageSystem worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+                worldManageSystem.BiomesChance[biome] = x;
+            };
+        }
+
+        private static Action<int> SetHardModeChance(string biome)
+        {
+            return (x) =>
+            {
+                WorldManageSystem worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+                worldManageSystem.HardmodeChance[biome] = x;
+            };
+        }
+
+        private static Action<int> SetStructureChance(string structure)
+        {
+            return (x) =>
+            {
+                WorldManageSystem worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+                worldManageSystem.StructureChance[structure] = x;
+            };
+        }
+
+
+        private void Addchildren(UIElement parent)
         {
             WorldManageSystem worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
-            worldManageSystem.WorldRadius = self.Number;
+            parent.RemoveChild(multiworldRadius);
+            parent.RemoveChild(waitUpdate);
+            parent.RemoveChild(specialPanel);
+            parent.RemoveChild(scrollbar);
+            if (worldManageSystem.genMode == GenMode.Normal)
+            {
+                parent.Append(multiworldRadius);
+            }
+            else if (worldManageSystem.genMode == GenMode.Special)
+            {
+                parent.Append(scrollbar);
+                parent.Append(specialPanel);
+            }
+            else if (worldManageSystem.genMode != GenMode.Off)
+            {
+                parent.Append(waitUpdate);
+            }
+            parent.Recalculate();
+        }
+
+        private static void InputUpdateNumber(int number)
+        {
+            WorldManageSystem worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+            worldManageSystem.WorldRadius = number;
         }
 
         private void Worldtypebutton_OnClick(UIMouseEvent evt, UIElement listeningElement)
@@ -102,28 +185,19 @@ namespace MultiWorld.Common.UI.State
             }
             var button = listeningElement as UIAutoScaleTextTextPanel<LocalizedText>;
             button.SetText(Language.GetText($"Mods.MultiWorld.UI.WorldtypeButton.{worldManageSystem.genMode}"));
-            if (button.Parent.HasChild(multiworldRadius))
-            {
-                button.Parent.RemoveChild(multiworldRadius);
-            }
-            if (button.Parent.HasChild(waitUpdate))
-            {
-                button.Parent.RemoveChild(waitUpdate);
-            }
-            if (worldManageSystem.genMode == GenMode.Normal)
-            {
-                button.Parent.Append(multiworldRadius);
-            }
-            else if (worldManageSystem.genMode != GenMode.Off)
-            {
-                button.Parent.Append(waitUpdate);
-            }
+            Addchildren(button.Parent);
         }
 
         private void Backbutton_OnClick(UIMouseEvent evt, UIElement listeningElement)
         {
+            ModContent.GetInstance<UIManageSystem>().dragging = null;
             SoundEngine.PlaySound(SoundID.MenuClose);
             Main.MenuUI.GoBack();
+        }
+
+        public override void OnDeactivate()
+        {
+            ModContent.GetInstance<UIManageSystem>().dragging = null;
         }
     }
 }

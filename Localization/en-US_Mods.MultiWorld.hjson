@@ -13,85 +13,129 @@ UI: {
 	WorldtypeButton: {
 		Off: Off
 		Normal: Normal multi world
-		Sepecial: One biome per map
+		Special: One biome per map
 		RandomMod: Custom mod generate in map
+	}
+
+	Special: {
+		Headers: {
+			Biome: Biome Chance
+			Structure: Structure Chance
+			HardMode: Hard Mode Chance
+		}
+
+		Biome: {
+			Forest: "Forest Chance: "
+			Desert: "Desert Chance: "
+			Jungle: "Jungle Chance: "
+			Snow: "Snow Chance: "
+			Ocean: "Ocean Chance: "
+		}
+
+		Structure: {
+			Dungeon: "Dungeon Chance: "
+			Temple: "Temple Chance: "
+			Shimmer: "Shimmer Chance: "
+		}
+
+		HardMode: {
+			Evil: "Evil Hard Mode Chance: "
+			Hallow: "Hallow Hard Mode Chance: "
+			NoneGen: "NoneGen Chance: "
+		}
+	}
+
+	Configs: {
+		Beta: {
+			DisplayName: Beta Features
+			Headers.Action: Action
+
+			OpenWorldSettingButton: {
+				Label: Open World Setting Button
+				Tooltip: ""
+			}
+		}
+
+		OpenWorldSettingButton: {
+			Tooltip: ""
+
+			Button: {
+				Label: Button
+				Tooltip: ""
+			}
+		}
 	}
 }
 
 Configs: {
 	Beta: {
-		DisplayName: Beta Features
-
-		GenMode: {
-			Label: World Generate Mode
-			Tooltip: Choose mode for world generate.
-		}
+		DisplayName: Beta
 
 		Headers: {
-			BiomeChance: Biome Chance
-			StructureChance: Structure Chance
-			HardModeChance: Hard Mode Chance
-			Action: Action
+			BiomeChance: Biome Chance Header
+			HardModeChance: Hard Mode Chance Header
+			StructureChance: Structure Chance Header
+			Action: Action Header
 		}
 
 		ForestChance: {
 			Label: Forest Chance
-			Tooltip: Forest biome spawn chance
+			Tooltip: ""
 		}
 
 		DesertChance: {
 			Label: Desert Chance
-			Tooltip: Desert biome spawn chance
+			Tooltip: ""
 		}
 
 		JungleChance: {
 			Label: Jungle Chance
-			Tooltip: Jungle biome spawn chance
+			Tooltip: ""
 		}
 
 		SnowChance: {
 			Label: Snow Chance
-			Tooltip: Snow biome spawn chance
+			Tooltip: ""
 		}
 
 		OceanChance: {
 			Label: Ocean Chance
-			Tooltip: Ocean biome spawn chance
+			Tooltip: ""
 		}
 
 		EvilChance: {
 			Label: Evil Chance
-			Tooltip: Evil biome spawn chance
-		}
-
-		DungeonChance: {
-			Label: Dungeon Chance
-			Tooltip: Dungeon spawn chance
-		}
-
-		TempleChance: {
-			Label: Temple Chance
-			Tooltip: Temple spawn chance
-		}
-
-		ShimmerChance: {
-			Label: Shimmer Chance
-			Tooltip: Shimmer spawn chance
+			Tooltip: ""
 		}
 
 		EvilHardModeChance: {
 			Label: Evil Hard Mode Chance
-			Tooltip: Hard mode evil biome spawn chance
+			Tooltip: ""
 		}
 
 		HallowHardModeChance: {
 			Label: Hallow Hard Mode Chance
-			Tooltip: Hard mode hallow biome spawn chance
+			Tooltip: ""
 		}
 
 		NoneGenChance: {
-			Label: NoneGen Chance
-			Tooltip: Chance for not gen hardmode
+			Label: None Gen Chance
+			Tooltip: ""
+		}
+
+		DungeonChance: {
+			Label: Dungeon Chance
+			Tooltip: ""
+		}
+
+		TempleChance: {
+			Label: Temple Chance
+			Tooltip: ""
+		}
+
+		ShimmerChance: {
+			Label: Shimmer Chance
+			Tooltip: ""
 		}
 
 		OpenWorldSettingButton: {

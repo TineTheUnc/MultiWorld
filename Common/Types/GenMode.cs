@@ -1,9 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MultiWorld.Common.Types
 {
@@ -12,7 +8,7 @@ namespace MultiWorld.Common.Types
     {
         Off = 0,
         Normal = 1,
-        Sepecial = 2,
+        Special = 2,
         RandomMod = 3,
         Unknown = 99
     }
@@ -51,8 +47,8 @@ namespace MultiWorld.Common.Types
             {
                 "off" => GenMode.Off,
                 "normal" => GenMode.Normal,
-                "sepecial" => GenMode.Sepecial, // typo legacy
-                "special" => GenMode.Sepecial,
+                "sepecial" => GenMode.Special, // typo legacy
+                "special" => GenMode.Special,
                 "randommod" => GenMode.RandomMod,
                 "randommode" => GenMode.RandomMod,
                 _ => GenMode.Unknown
