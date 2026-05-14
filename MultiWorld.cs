@@ -23,6 +23,8 @@ namespace MultiWorld
         public static readonly string Asset = Path.Combine(MainDir, "Asset");
         public static readonly string WorldSetting = Path.Combine(MainDir, "Setting");
 
+        private static readonly FieldInfo PlayerEntityIdField = typeof(Player).GetField("entityId", BindingFlags.Instance | BindingFlags.NonPublic);
+
         public override void Load()
         {
             Directory.CreateDirectory(WorldSetting);
@@ -56,27 +58,32 @@ namespace MultiWorld
             //worldManageSystem.resetChance();
             //worldManageSystem.Radius = 0;
             Container.Parent.Parent.Height = StyleDimension.FromPixels((float)(338 + 18));
-            var wc = new UIWorldCreate();
+            var uiSystem = ModContent.GetInstance<UIManageSystem>();
+            uiSystem.uIWorldCreate = new UIWorldCreate();
             var multiworldButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MultiWorld.UI.MultiWorldButton"))
             {
                 Width = StyleDimension.FromPixelsAndPercent(0f, 3f),
             }.WithFadedMouseOver(); ;
             multiworldButton.Top.Set(accumualtedHeight, 0f);
-            multiworldButton.OnLeftClick += (UIMouseEvent _, UIElement listeningElement) =>
-            {
-
-                Main.MenuUI.SetState(wc);
-                Main.menuMode = 888;
-            };
-            multiworldButton.OnMouseOver += (UIMouseEvent _, UIElement listeningElement) =>
-            {
-                var UIWorldCreation_descriptionTextInfo = typeof(UIWorldCreation).GetField("_descriptionText", BindingFlags.Instance | BindingFlags.NonPublic);
-                var UIWorldCreation_descriptionText = (UIText)UIWorldCreation_descriptionTextInfo.GetValue(Main.MenuUI.CurrentState);
-                UIWorldCreation_descriptionText.SetText(Language.GetText("Mods.MultiWorld.UI.Description.MultiWorldButton"));
-            };
+            multiworldButton.OnLeftClick += OnLeftClickMultiWorldButton;
+            multiworldButton.OnMouseOver += OnMouseOverMultiWorldButton;
             multiworldButton.OnMouseOut += ClearOptionDescription;
             multiworldButton.OnUpdate += MultiworldButtonOnUpdate;
             Container.Append(multiworldButton);
+        }
+
+        private static void OnLeftClickMultiWorldButton(UIMouseEvent _, UIElement listeningElement)
+        {
+            var uiSystem = ModContent.GetInstance<UIManageSystem>();
+            Main.MenuUI.SetState(uiSystem.uIWorldCreate);
+            Main.menuMode = 888;
+        }
+
+        private static void OnMouseOverMultiWorldButton(UIMouseEvent _, UIElement listeningElement)
+        {
+            var UIWorldCreation_descriptionTextInfo = typeof(UIWorldCreation).GetField("_descriptionText", BindingFlags.Instance | BindingFlags.NonPublic);
+            var UIWorldCreation_descriptionText = (UIText)UIWorldCreation_descriptionTextInfo.GetValue(Main.MenuUI.CurrentState);
+            UIWorldCreation_descriptionText.SetText(Language.GetText("Mods.MultiWorld.UI.Description.MultiWorldButton"));
         }
 
         private static void MultiworldButtonOnUpdate(UIElement listeningElement)
@@ -98,54 +105,23 @@ namespace MultiWorld
         }
         public static bool CanSpawn(int x, int y)
         {
-            List<bool> X = [];
-            List<bool> Y = [];
+            if (y < 10 || y > Main.maxTilesY - 10) return false;
             for (int i = x - 1; i < x + 1; i++)
-            {
-                var I = i;
-                if (I < 0)
-                {
-                    I = 10;
-                }
-                else if (I > Main.maxTilesX - 1)
-                {
-                    I = Main.maxTilesX - 10;
-                }
-                if (IsAir(i, y))
-                {
-                    X.Add(true);
-                }
-                else
-                {
-                    X.Add(false);
-                }
-            }
+                if (!IsAir(i, y))
+                    return false;
+
             for (int i = y - 2; i < y + 2; i++)
-            {
-                var I = i;
-                if (I < 0)
-                {
-                    I = 10;
-                }
-                else if (I > Main.maxTilesY - 1)
-                {
-                    I = Main.maxTilesY - 10;
-                }
-                if (IsAir(x, i))
-                {
-                    Y.Add(true);
-                }
-                else
-                {
-                    Y.Add(false);
-                }
-            }
-            return !(X.Contains(false) || Y.Contains(false));
+                if (!IsAir(x, i))
+                    return false;
+            return true;
         }
 
 
         public static bool IsAir(int x, int y)
         {
+            if (x < 0 || x >= Main.maxTilesX || y < 0 || y >= Main.maxTilesY)
+                return false;
+
             return !(Main.tile[x, y].HasUnactuatedTile || Main.tile[x, y].LiquidAmount > 0);
         }
     }

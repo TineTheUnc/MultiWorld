@@ -60,7 +60,6 @@ namespace MultiWorld.Common.Types
             GenMode value,
             JsonSerializer serializer)
         {
-            // serialize ออกเป็นแบบใหม่เสมอ
             writer.WriteValue(value.ToString());
         }
     }

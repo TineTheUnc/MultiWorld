@@ -106,7 +106,7 @@ namespace MultiWorld
                     if (worldManageSystem.ModHookList.Count > 0)
                     {
                         int index = WorldGen.genRand.Next(worldManageSystem.ModHookList.Count);
-                        worldManageSystem.RandomMod = worldManageSystem.ModHookList.ToArray()[index];
+                        worldManageSystem.RandomMod = worldManageSystem.ModHookList.ElementAt(index);
                     }
                 }
             }
@@ -135,11 +135,9 @@ namespace MultiWorld
             orig(self);
             if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
             {
-                var entityIdInfo = self.GetType().GetField("entityId", BindingFlags.Instance | BindingFlags.NonPublic);
-                var entityId = (long)entityIdInfo.GetValue(self);
-                var data = MultiWorldFileData.LoadMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"));
-                data.spawnPoint?.Remove(entityId);
-                MultiWorldFileData.SaveMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"), data);
+                var entityId = (long)PlayerEntityIdField.GetValue(self);
+                var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+                worldManageSystem.metaData.spawnPoint?.Remove(entityId);
             }
         }
 
@@ -148,11 +146,9 @@ namespace MultiWorld
             orig(self, x, y);
             if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
             {
-                var entityIdInfo = self.GetType().GetField("entityId", BindingFlags.Instance | BindingFlags.NonPublic);
-                var entityId = (long)entityIdInfo.GetValue(self);
-                var data = MultiWorldFileData.LoadMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"));
-                data.spawnPoint?.Add(entityId, int.Parse(Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path)));
-                MultiWorldFileData.SaveMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"), data);
+                var entityId = (long)PlayerEntityIdField.GetValue(self);
+                var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
+                worldManageSystem.metaData.spawnPoint?.Add(entityId, int.Parse(Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path)));
             }
 
         }
@@ -198,43 +194,21 @@ namespace MultiWorld
 
             string[] files = Directory.GetDirectories(Main.WorldPath, "*.world");
             int num = Math.Min(files.Length, (int)typeof(Main).GetField("maxLoadWorld", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null));
-            if (Main.dedServ)
+            for (int i = 0; i < num; i++)
             {
-                for (int i = 0; i < num; i++)
+                try
                 {
-                    try
-                    {
-                        WorldFileData allMetadata = WorldFile.GetAllMetadata(MultiWorldFileData.GetFilePath(files[i]), cloudSave: false);
-                        if (allMetadata != null)
-                            Main.WorldList.Add(allMetadata);
-                        else
-                            Main.WorldList.Add(WorldFileData.FromInvalidWorld(MultiWorldFileData.GetFilePath(files[i]), cloudSave: false));
-                    }
-                    catch
-                    {
-                        continue;
-                    }
+                    WorldFileData allMetadata = WorldFile.GetAllMetadata(MultiWorldFileData.GetFilePath(files[i]), cloudSave: false);
+                    if (allMetadata != null)
+                        Main.WorldList.Add(allMetadata);
+                    else
+                        Main.WorldList.Add(WorldFileData.FromInvalidWorld(MultiWorldFileData.GetFilePath(files[i]), cloudSave: false));
+                }
+                catch
+                {
+                    continue;
                 }
             }
-            else
-            {
-                for (int j = 0; j < num; j++)
-                {
-                    try
-                    {
-                        WorldFileData allMetadata2 = WorldFile.GetAllMetadata(MultiWorldFileData.GetFilePath(files[j]), cloudSave: false);
-                        if (allMetadata2 != null)
-                            Main.WorldList.Add(allMetadata2);
-                        else
-                            Main.WorldList.Add(WorldFileData.FromInvalidWorld(MultiWorldFileData.GetFilePath(files[j]), cloudSave: false));
-                    }
-                    catch
-                    {
-                        continue;
-                    }
-                }
-            }
-
             Main.WorldList.Sort(WorldListSortMethod);
         }
 

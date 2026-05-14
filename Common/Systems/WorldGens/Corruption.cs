@@ -73,24 +73,8 @@ namespace MultiWorld.Common.Systems.WorldGens
 
             protected override void ApplyPass(GenerationProgress progress, GameConfiguration passConfig)
             {
-                int num778 = Main.maxTilesX;
-                int num779 = 0;
-                int num780 = Main.maxTilesX;
-                int num781 = 0;
-                int num784 = 10;
-                num778 -= num784;
-                num779 += num784;
-                num780 -= num784;
-                num781 += num784;
-                int num785 = 500;
-                int num786 = 100;
                 bool flag49 = WorldGen.crimson;
                 double num787 = (double)Main.maxTilesX * 0.001;
-                if (WorldGen.tenthAnniversaryWorldGen)
-                {
-                    num785 *= 2;
-                    num786 *= 2;
-                }
                 if (WorldGen.drunkWorldGen)
                 {
                     flag49 = true;
@@ -264,10 +248,6 @@ namespace MultiWorld.Common.Systems.WorldGens
                     int num811 = 0;
                     while ((double)num811 < num787)
                     {
-                        int num812 = num780;
-                        int num813 = num781;
-                        int num814 = num778;
-                        int num815 = num779;
                         double value16 = (double)num811 / num787;
                         progress.Set(value16);
                         int num816 = ((!WorldGen.drunkWorldGen) ? WorldGen.genRand.Next(100, Main.maxTilesX - 100) : (GenVars.crimsonLeft ? WorldGen.genRand.Next((int)((double)Main.maxTilesX * 0.5), Main.maxTilesX - 100) : WorldGen.genRand.Next(100, (int)((double)Main.maxTilesX * 0.5))));

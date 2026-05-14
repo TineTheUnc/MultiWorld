@@ -12,35 +12,23 @@ using Terraria.ModLoader;
 
 namespace MultiWorld.Common.Types
 {
-    public class MultiWorldFileData : WorldFileData
+    public class MultiWorldFileData(string path, bool cloudSave) : WorldFileData(path, cloudSave)
     {
-        public List<WorldFileData> Maps;
         public bool CloudSave;
-        public MultiWorldFileData(string path, bool cloudSave) : base(path, cloudSave)
-        {
-            foreach (var fileName in Directory.GetFiles(Path))
-            {
-                var file = new FileInfo(fileName);
-                if (file.Exists)
-                {
-                    if (file.Extension == "wld")
-                    {
-                        if (file.Name != "meta.wld")
-                        {
-                            Maps.Add(new(file.FullName, cloudSave));
-                        }
-                    }
-                }
-            }
-        }
 
+        public static Dictionary<string, MetaData> MultiWorlds = [];
+
+        public static int GetWorldIndex(string path) => int.Parse(System.IO.Path.GetFileNameWithoutExtension(path));
         public static void SaveMeta(string path, MetaData data)
         {
+            MultiWorlds = [];
             var f = new FileInfo(path);
             if (!Directory.Exists(f.DirectoryName))
                 Directory.CreateDirectory(f.DirectoryName);
 
-            var jsonData = JsonConvert.SerializeObject(data);
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new MetaDataConverter());
+            var jsonData = JsonConvert.SerializeObject(data, settings);
             using var fs = new FileStream(path, FileMode.Create);
             using var gz = new GZipStream(fs, CompressionLevel.Optimal);
             gz.Write(Encoding.ASCII.GetBytes(jsonData));
@@ -49,6 +37,10 @@ namespace MultiWorld.Common.Types
 
         public static MetaData LoadMeta(string path)
         {
+            if (MultiWorlds.TryGetValue(path, out MetaData cachedData))
+            {
+                return cachedData;
+            }
             try
             {
                 using var fs = new FileStream(path, FileMode.Open);
@@ -59,7 +51,11 @@ namespace MultiWorld.Common.Types
                 using var sr = new StreamReader(gz);
                 string json = sr.ReadToEnd();
                 if (string.IsNullOrWhiteSpace(json)) throw new Exception("Decompressed JSON is empty.");
-                return JsonConvert.DeserializeObject<MetaData>(json) ?? throw new Exception("Failed to deserialize MetaData.");
+                var settings = new JsonSerializerSettings();
+                settings.Converters.Add(new MetaDataConverter());
+                var data = JsonConvert.DeserializeObject<MetaData>(json, settings) ?? throw new Exception("Failed to deserialize MetaData.");
+                MultiWorlds[path] = data;
+                return data;
             }
             catch (Exception ex)
             {
@@ -153,6 +149,20 @@ namespace MultiWorld.Common.Types
             if (directory.Last().Contains(".world"))
             {
                 return directory.Last().Replace(".world", "");
+            }
+            return null;
+        }
+
+        public static string GetMetaFile(string path)
+        {
+            var directory = System.IO.Path.GetDirectoryName(path).Split(System.IO.Path.DirectorySeparatorChar);
+            if (directory.Last() == "Worlds")
+            {
+                return null;
+            }
+            if (directory.Last().Contains(".world"))
+            {
+                return System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path), "meta.world");
             }
             return null;
         }

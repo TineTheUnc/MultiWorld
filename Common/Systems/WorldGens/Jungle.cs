@@ -55,11 +55,12 @@ namespace MultiWorld.Common.Systems.WorldGens
                     }
                 }
             }
+            var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
             int temple = tasks.FindIndex(genpass => genpass.Name.Equals("Temple"));
             int jungle_temple = tasks.FindIndex(genpass => genpass.Name.Equals("Jungle Temple"));
             int lihzahrd_altars = tasks.FindIndex(genpass => genpass.Name.Equals("Lihzahrd Altars"));
-
-            if (OneBiome.HaveTemple)
+            bool shouldGenTemple = !OneBiome.HaveTemple && WorldGen.genRand.NextBool(worldManageSystem.StructureChance["Temple"], 10);
+            if (!shouldGenTemple)
             {
                 tasks[temple].Disable();
                 tasks[jungle_temple].Disable();
@@ -67,17 +68,7 @@ namespace MultiWorld.Common.Systems.WorldGens
             }
             else
             {
-                var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
-                if (!WorldGen.genRand.NextBool(worldManageSystem.StructureChance["Temple"], 10))
-                {
-                    tasks[temple].Disable();
-                    tasks[jungle_temple].Disable();
-                    tasks[lihzahrd_altars].Disable();
-                }
-                else
-                {
-                    OneBiome.HaveTempleGen = true;
-                }
+                OneBiome.HaveTempleGen = true;
             }
             return tasks;
         }

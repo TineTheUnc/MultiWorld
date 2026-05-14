@@ -71,8 +71,8 @@ namespace MultiWorld.Common.Systems.WorldGens
                     }
                     else if (item == "Full Desert")
                     {
-                        tasks.Insert(index, new DesertPass(loadWeight / 2));
                         tasks.Insert(index, new MoreSand(loadWeight / 2));
+                        tasks.Insert(index, new DesertPass(loadWeight / 2));
                     }
                 }
             }
@@ -100,7 +100,7 @@ namespace MultiWorld.Common.Systems.WorldGens
                     while (!desertBiome.Place(new Point(x16[c], (int)GenVars.worldSurfaceHigh + 25), GenVars.structures))
                     {
                         bool ok = false;
-                        while (ok)
+                        while (!ok)
                         {
                             num961 = WorldGen.genRand.Next(num960) / 2;
                             num961 += num960 / 8;
@@ -190,7 +190,7 @@ namespace MultiWorld.Common.Systems.WorldGens
             {
                 for (int i = 0; i < Main.maxTilesX - 1; i++)
                 {
-                    progress.Set(i / Main.maxTilesX);
+                    progress.Set((double)i / Main.maxTilesX);
                     var num1 = WorldGen.genRand.Next(1, 10);
                     for (int j = GenVars.lavaLine - num1; j > 1; j--)
                     {

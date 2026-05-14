@@ -68,37 +68,24 @@ namespace MultiWorld.Common.Systems.WorldGens
             {
                 int dungeon = tasks.FindIndex(genpass => genpass.Name.Equals("Dungeon"));
                 var worldManageSystem = ModContent.GetInstance<WorldManageSystem>();
-                if (OneBiome.HaveDungeon)
+                bool shouldGenDungeon = !OneBiome.HaveDungeon && WorldGen.genRand.NextBool(worldManageSystem.StructureChance["Dungeon"], 10);
+                if (!shouldGenDungeon)
                 {
                     tasks[dungeon].Disable();
                 }
                 else
                 {
-                    if (!WorldGen.genRand.NextBool(worldManageSystem.StructureChance["Dungeon"], 10))
-                    {
-                        tasks[dungeon].Disable();
-                    }
-                    else
-                    {
-                        OneBiome.HaveDungeonGen = true;
-                    }
+                    OneBiome.HaveDungeonGen = true;
                 }
                 int shimmer = tasks.FindIndex(genpass => genpass.Name.Equals("Shimmer"));
-                if (OneBiome.HaveShimmer)
+                bool shouldGenShimmer = !OneBiome.HaveShimmer && WorldGen.genRand.NextBool(worldManageSystem.StructureChance["Shimmer"], 10);
+                if (!shouldGenShimmer)
                 {
                     tasks[shimmer].Disable();
                 }
                 else
                 {
-
-                    if (!WorldGen.genRand.NextBool(worldManageSystem.StructureChance["Shimmer"], 10))
-                    {
-                        tasks[shimmer].Disable();
-                    }
-                    else
-                    {
-                        OneBiome.HaveShimmerGen = true;
-                    }
+                    OneBiome.HaveShimmerGen = true;
                 }
             }
             return tasks;

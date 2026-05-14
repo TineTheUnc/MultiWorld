@@ -51,17 +51,24 @@ namespace MultiWorld.Common.Systems.WorldGens
             Shimmer = true;
             Evil = 0;
             HaveDungeonGen = HaveDungeon;
-            HaveTemple = HaveTempleGen;
-            HaveShimmer = HaveShimmerGen;
+            HaveTempleGen = HaveTemple;
+            HaveShimmerGen = HaveShimmer;
         }
 
         public static string RandomGen(Dictionary<string, int> BiomesChance)
         {
-            int totalWeight = BiomesChance.Values.Sum();
-            int roll = WorldGen.genRand.Next(0, totalWeight);
+            Dictionary<string, int> Chance = [];
+            foreach (var key in BiomesChance.Keys)
+            {
+                if (BiomesChance[key] > 0)
+                {
+                    Chance.Add(key, BiomesChance[key]);
+                }
+            }
+            int totalWeight = Chance.Values.Sum();
             int cumulative = 0;
-            var shuffled = BiomesChance.OrderBy(x => WorldGen.genRand.Next());
-            foreach (var kvp in shuffled)
+            int roll = WorldGen.genRand.Next(totalWeight);
+            foreach (var kvp in Chance)
             {
                 cumulative += kvp.Value;
                 if (roll < cumulative)
@@ -94,8 +101,8 @@ namespace MultiWorld.Common.Systems.WorldGens
                         BiomesChance = handler(BiomesChance);
                     }
                 }
+                if (BiomesChance == null || BiomesChance.Count == 0) throw new Exception("BiomesChance broken by OnRandomGen");
                 Biome = RandomGen(BiomesChance);
-                Console.WriteLine(BiomesChance["Forest"]);
                 tasks = WorldBiomes[Biome](tasks, ref totalWeight);
             }
             return tasks;

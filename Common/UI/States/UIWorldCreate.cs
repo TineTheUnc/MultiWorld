@@ -59,11 +59,11 @@ namespace MultiWorld.Common.UI.States
             specialPanel.SetScrollbar(scrollbar);
             UINumberSliderPanel biomeSlider = new(Language.GetText("Mods.MultiWorld.UI.Special.Headers.Biome").Value,
                 [
-                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Forest").Value, 1,10,1,worldManageSystem.BiomesChance["Forest"],OnValueChanged: SetBiomeChance("Forest")),
-                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Desert").Value, 1,10,1,worldManageSystem.BiomesChance["Desert"],OnValueChanged: SetBiomeChance("Desert")),
-                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Jungle").Value, 1,10,1,worldManageSystem.BiomesChance["Jungle"],OnValueChanged: SetBiomeChance("Jungle")),
-                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Snow").Value, 1,10,1,worldManageSystem.BiomesChance["Snow"], OnValueChanged : SetBiomeChance("Snow")),
-                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Ocean").Value, 1,10,1,worldManageSystem.BiomesChance["Ocean"], OnValueChanged : SetBiomeChance("Ocean")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Forest").Value, 0,10,1,worldManageSystem.BiomesChance["Forest"],OnValueChanged: SetBiomeChance("Forest")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Desert").Value, 0,10,1,worldManageSystem.BiomesChance["Desert"],OnValueChanged: SetBiomeChance("Desert")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Jungle").Value, 0,10,1,worldManageSystem.BiomesChance["Jungle"],OnValueChanged: SetBiomeChance("Jungle")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Snow").Value, 0,10,1,worldManageSystem.BiomesChance["Snow"], OnValueChanged : SetBiomeChance("Snow")),
+                new(Language.GetText("Mods.MultiWorld.UI.Special.Biome.Ocean").Value, 0,10,1,worldManageSystem.BiomesChance["Ocean"], OnValueChanged : SetBiomeChance("Ocean")),
                 ]
             )
             {

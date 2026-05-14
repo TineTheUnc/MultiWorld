@@ -55,7 +55,6 @@ namespace MultiWorld.Common.Systems.WorldGens
                 if (index != -1)
                 {
                     double loadWeight = tasks[index].Weight;
-                    totalWeight += loadWeight;
                     tasks[index].Disable();
                     if (item == "Buried Chests")
                     {
@@ -93,7 +92,7 @@ namespace MultiWorld.Common.Systems.WorldGens
                         int num204 = WorldGen.genRand.Next(1, 4);
                         int num205 = WorldGen.genRand.Next(12);
                         int num206 = (num205 >= 3) ? ((num205 < 6) ? 1 : ((num205 < 8) ? 2 : ((num205 < 10) ? 3 : ((num205 >= 11) ? 5 : 4)))) : 0;
-                        for (int num207 = num200; num207 < num200; num207++)
+                        for (int num207 = num200 - num203; num207 <= num200 + num204; num207++)
                         {
                             for (int num208 = num199 - num203; num208 < num199 + num204; num208++)
                             {
@@ -188,29 +187,14 @@ namespace MultiWorld.Common.Systems.WorldGens
                                 Main.tile[num981, num980].WallType = WallID.SnowWallUnsafe;
                             }
                             ushort num983 = Main.tile[num981, num980].TileType;
-                            if (num983 <= 23)
+                            if (num983 == 1)
                             {
-                                switch (num983)
-                                {
-                                    case 0:
-                                    case 2:
-                                        break;
-                                    case 1:
-                                        Main.tile[num981, num980].TileType = TileID.IceBlock;
-                                        goto IL_33F;
-                                    default:
-                                        if (num983 != 23)
-                                        {
-                                            goto IL_33F;
-                                        }
-                                        break;
-                                }
+                                Main.tile[num981, num980].TileType = TileID.IceBlock;
                             }
-                            else if (num983 != 40 && num983 != 53)
+                            else if (num983 == 0 || num983 == 2 || num983 == 23 || num983 == 40 || num983 == 53)
                             {
-                                goto IL_33F;
+                                Main.tile[num981, num980].TileType = TileID.SnowBlock;
                             }
-                            Main.tile[num981, num980].TileType = TileID.SnowBlock;
                         }
                         else
                         {
@@ -239,37 +223,18 @@ namespace MultiWorld.Common.Systems.WorldGens
                                     Main.tile[num981, num982].WallType = WallID.SnowWallUnsafe;
                                 }
                                 ushort num983 = Main.tile[num981, num982].TileType;
-                                if (num983 <= 23)
+                                if (num983 == 1)
                                 {
-                                    switch (num983)
-                                    {
-                                        case 0:
-                                        case 2:
-                                            goto IL_2F1;
-                                        case 1:
-                                            Main.tile[num981, num982].TileType = TileID.IceBlock;
-                                            break;
-                                        default:
-                                            if (num983 == 23)
-                                            {
-                                                goto IL_2F1;
-                                            }
-                                            break;
-                                    }
+                                    Main.tile[num981, num982].TileType = TileID.IceBlock;
                                 }
-                                else if (num983 == 40 || num983 == 53)
+                                else if (num983 == 0 || num983 == 2 || num983 == 23 || num983 == 40 || num983 == 53)
                                 {
-                                    goto IL_2F1;
+                                    Main.tile[num981, num982].TileType = TileID.SnowBlock;
                                 }
-                            IL_32D:
                                 num982++;
                                 continue;
-                            IL_2F1:
-                                Main.tile[num981, num982].TileType = TileID.SnowBlock;
-                                goto IL_32D;
                             }
                         }
-                    IL_33F:;
                     }
                     if (GenVars.snowBottom < num980)
                     {

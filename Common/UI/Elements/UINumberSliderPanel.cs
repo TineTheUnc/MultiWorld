@@ -34,7 +34,7 @@ namespace MultiWorld.Common.UI.Elements
             int y = 40;
             foreach (var x in list)
             {
-                var text = new UIText($"{x.Text} {x.Min}")
+                var text = new UIText($"{x.Text} {x.Start}")
                 {
                     HAlign = 0f,
                     Top = { Pixels = y }

@@ -73,8 +73,8 @@ namespace MultiWorld.Common.UI.Elements
             Max = max;
             Increment = increment;
             ColorMethod = percent => Color.Lerp(Color.Black, SliderColor, percent);
+            rawProportion = Proportion;
             Texture2D tex = TextureAssets.ColorBar.Value;
-
             Width.Set(tex.Width, 0f);
             Height.Set(tex.Height, 0f);
             IgnoresMouseInteraction = false;

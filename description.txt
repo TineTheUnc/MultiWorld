@@ -10,18 +10,14 @@ You can play normal world and can switch world create between normal world and m
 
 Move old update log to github wiki.
 
-V0.14
-- Change modconfig.
-Can select world type and button for open config world folder.
-- Change world list UI.
-Show world type behind world name.
-- Add new world type "Random Mod".
-This world type will random mod world gen in one map and can config for mod group.
-
 V0.15
 - Add new UI in world creation page for select world type.
 - Bug fix for special world type.
 - Move world option from config page to  world creation page
+
+V0.16
+- Bug fix and optimization.
+- Change World Mirror item sprite.
 
 Not found any bug in testing but i can't test in every case. (be careful)
 

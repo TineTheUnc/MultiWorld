@@ -175,7 +175,7 @@ namespace MultiWorld.Common.Systems.WorldGens
                 }
                 else
                 {
-                    for (int m = Main.maxTilesX; m > 0; m--)
+                    for (int m = Main.maxTilesX - 1; m >= 0; m--)
                     {
                         for (int n = 0; n < Main.maxTilesY - 5; n++)
                         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MultiWorld.Common.UI.States;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +12,6 @@ namespace MultiWorld.Common.Systems
     public class UIManageSystem: ModSystem
     {
         internal UIElement dragging = null;
+        public UIWorldCreate uIWorldCreate { get; set; }
     }
 }

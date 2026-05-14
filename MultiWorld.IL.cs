@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MultiWorld.Common.Config;
@@ -153,13 +154,11 @@ namespace MultiWorld
                     if (MultiWorldFileData.IsMultiWorld(Main.ActiveWorldFileData.Path))
                     {
                         var System = ModContent.GetInstance<WorldManageSystem>();
-                        var data = MultiWorldFileData.LoadMeta(Path.Combine(Path.GetDirectoryName(Main.ActiveWorldFileData.Path), "meta.world"));
-                        var entityIdInfo = self.GetType().GetField("entityId", BindingFlags.Instance | BindingFlags.NonPublic);
-                        var entityId = (long)entityIdInfo.GetValue(self);
+                        var entityId = (long)PlayerEntityIdField.GetValue(self);
                         System.NextWorldIndex = 0;
-                        if (data.spawnPoint != null)
+                        if (System.metaData.spawnPoint != null)
                         {
-                            if (data.spawnPoint.TryGetValue(entityId, out int value))
+                            if (System.metaData.spawnPoint.TryGetValue(entityId, out int value))
                             {
                                 System.NextWorldIndex = value;
                             }
@@ -464,9 +463,20 @@ namespace MultiWorld
                 ilCursor.EmitCallvirt(typeof(FileData).GetMethod("get_Path", BindingFlags.Instance | BindingFlags.Public));
                 ilCursor.EmitDelegate<Func<string, string>>((path) =>
                 {
-                    var data = MultiWorldFileData.LoadMeta(Path.Combine(Path.GetDirectoryName(path), "meta.world"));
-                    var config = ModContent.GetInstance<Beta>();
-                    return $" [ {data.GetModeName()} ]";
+                    var file = MultiWorldFileData.GetMetaFile(path);
+                    if (file == null)
+                    {
+                        return " [ ]";
+                    }
+                    var metaData = MultiWorldFileData.LoadMeta(file);
+                    if (metaData != null)
+                    {
+                        return $" [ {metaData.GetModeName()} ]";
+                    }
+                    else
+                    {
+                        return " [ ]";
+                    }
                 });
                 ilCursor.EmitCall(typeof(string).GetMethod("Concat", [typeof(string), typeof(string)]));
                 ilCursor.EmitStloc(4);
@@ -556,6 +566,11 @@ namespace MultiWorld
                     if (!worldManageSystem.do_chaneWorld)
                     {
                         Main.menuMode = 0;
+                    }
+                    else
+                    {
+                        worldManageSystem.metaData = null;
+                        worldManageSystem.LoadedMod = [];
                     }
                 });
             }
