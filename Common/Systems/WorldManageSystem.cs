@@ -803,8 +803,8 @@ namespace MultiWorld.Common.Systems
                     }
                 }
             }
-            var basePath = Main.ActiveWorldFileData.Path[..^(NextWorldIndex.ToString().Length+4)];
-            var nextWorld = $"{basePath}{NextWorldIndex}.wld";
+            var basePath = Main.ActiveWorldFileData.Path[..^(CurrentWorldIndex.ToString().Length+4)];
+            var nextWorld = Path.Combine(basePath, $"{NextWorldIndex}.wld");
             if (!File.Exists(nextWorld))
             {
                 do_worldGen = true;
@@ -815,7 +815,8 @@ namespace MultiWorld.Common.Systems
 
         public void GenWolrd()
         {
-            var nextWorld = Main.ActiveWorldFileData.Path.Replace(CurrentWorldIndex.ToString(), NextWorldIndex.ToString());
+            var basePath = Main.ActiveWorldFileData.Path[..^(CurrentWorldIndex.ToString().Length + 4)];
+            var nextWorld = Path.Combine(basePath, $"{NextWorldIndex}.wld");
             if (do_worldGen)
             {
                 var directory = Path.GetDirectoryName(Main.ActiveWorldFileData.Path);

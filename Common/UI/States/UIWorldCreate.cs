@@ -2,6 +2,7 @@
 using MultiWorld.Common.Types;
 using MultiWorld.Common.UI.Elements;
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
